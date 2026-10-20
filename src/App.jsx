@@ -1,29 +1,32 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import AuthPage from './pages/AuthPage';
-import DashboardPage from './pages/DashboardPage';
+import CreateInterviewPage from './pages/CreateInterviewPage';
 import ProtectedRoute from './components/ProtectedRoute';
+import AppLayout from './components/AppLayout';
 import './App.css';
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Public Authentication Route */}
+        {/* Authentication Route */}
         <Route path="/" element={<AuthPage />} />
 
-        {/* Protected Dashboard Route */}
+        {/* Protected App Routes inside AppLayout */}
         <Route
-          path="/dashboard"
           element={
             <ProtectedRoute>
-              <DashboardPage />
+              <AppLayout />
             </ProtectedRoute>
           }
-        />
+        >
+          <Route path="/create-interview" element={<CreateInterviewPage />} />
+          <Route path="/dashboard" element={<Navigate to="/create-interview" replace />} />
+        </Route>
 
-        {/* Catch-all Fallback */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        {/* Fallback */}
+        <Route path="*" element={<Navigate to="/create-interview" replace />} />
       </Routes>
     </BrowserRouter>
   );

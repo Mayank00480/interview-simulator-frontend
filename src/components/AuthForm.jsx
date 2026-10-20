@@ -78,9 +78,9 @@ export default function AuthForm() {
       };
       localStorage.setItem('simulator_user', JSON.stringify(userData));
 
-      // Redirect to dashboard
+      // Redirect to create interview
       setTimeout(() => {
-        navigate('/dashboard');
+        navigate('/create-interview');
       }, 500);
     } catch (err) {
       console.error('Form submission error:', err);

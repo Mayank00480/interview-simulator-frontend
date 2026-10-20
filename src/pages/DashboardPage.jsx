@@ -1,16 +1,44 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logo from '../assets/logo.svg';
-import { logoutUser } from '../services';
+import { logoutUser, getUserProfile } from '../services';
 
 export default function DashboardPage() {
   const navigate = useNavigate();
-  const rawUser = localStorage.getItem('simulator_user');
-  const user = rawUser
-    ? JSON.parse(rawUser)
-    : { username: 'Candidate', email: 'user@example.com' };
+  const [user, setUser] = useState(() => {
+    const raw = localStorage.getItem('simulator_user');
+    return raw ? JSON.parse(raw) : null;
+  });
+  const [isLoading, setIsLoading] = useState(true);
 
-  const displayName = user.username || user.name || 'Candidate';
+  useEffect(() => {
+    let isMounted = true;
+
+    async function fetchProfile() {
+      try {
+        setIsLoading(true);
+        const data = await getUserProfile();
+        if (isMounted && data?.user) {
+          setUser(data.user);
+          localStorage.setItem('simulator_user', JSON.stringify(data.user));
+        }
+      } catch (err) {
+        if (isMounted) {
+          console.error('Failed to load profile:', err);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    fetchProfile();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -22,6 +50,9 @@ export default function DashboardPage() {
     }
   };
 
+  const displayName = user?.username || user?.name || 'Candidate';
+  const displayEmail = user?.email || '';
+
   return (
     <div className="auth-page-wrapper">
       <div className="bg-shape bg-shape-1" aria-hidden="true" />
@@ -30,8 +61,27 @@ export default function DashboardPage() {
       <main className="dashboard-card">
         <div className="dashboard-header">
           <img src={logo} alt="Logo" className="dashboard-logo" />
-          <h1>Welcome, {displayName}!</h1>
-          <p>{user.email}</p>
+          {isLoading && !user ? (
+            <div className="dashboard-loading-state">
+              <span
+                className="btn-spinner"
+                style={{
+                  borderColor: 'rgba(47, 107, 255, 0.2)',
+                  borderTopColor: '#2f6bff',
+                  margin: '12px auto',
+                }}
+              />
+              <p>Loading your profile...</p>
+            </div>
+          ) : (
+            <>
+              <h1>Welcome, {displayName}!</h1>
+              {displayEmail && <p>{displayEmail}</p>}
+              {user?._id && (
+                <span className="dashboard-user-id">ID: {user._id}</span>
+              )}
+            </>
+          )}
         </div>
 
         <div className="dashboard-stats-grid">
@@ -53,7 +103,7 @@ export default function DashboardPage() {
           <button
             type="button"
             className="submit-button"
-            onClick={() => alert('Starting your AI interview simulation session...')}
+            onClick={() => alert(`Starting AI interview simulation for ${displayName}...`)}
           >
             Start Practice Interview
           </button>

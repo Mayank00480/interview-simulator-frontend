@@ -49,6 +49,25 @@ export async function loginUser({ username, email, password }) {
 }
 
 /**
+ * Fetch authenticated user's profile
+ * @returns {Promise<Object>} Response containing user object { user: { _id, username, email } }
+ */
+export async function getUserProfile() {
+  try {
+    const response = await api.get('/users/profile');
+    return response.data;
+  } catch (error) {
+    console.error('Get profile API error:', error);
+    const message =
+      error.response?.data?.message ||
+      error.response?.data?.error ||
+      error.message ||
+      'Failed to fetch user profile.';
+    throw new Error(message);
+  }
+}
+
+/**
  * Log out user and clear session cookies
  * @returns {Promise<Object|void>}
  */

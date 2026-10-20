@@ -14,14 +14,27 @@ const api = axios.create({
   },
 });
 
-// Response interceptor to normalize error messages
+// Response interceptor to handle global errors and redirect on 401
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    const status = error.response?.status;
+    const responseMessage = error.response?.data?.message;
+
+    // If API returns 401 or "Authentication required", clear session and redirect to login
+    if (status === 401 || responseMessage === 'Authentication required') {
+      localStorage.removeItem('simulator_user');
+
+      // Redirect if not already on the login page
+      if (window.location.pathname !== '/' && window.location.pathname !== '/login') {
+        window.location.href = '/';
+      }
+    }
+
     const customError = {
-      status: error.response?.status,
+      status,
       message:
-        error.response?.data?.message ||
+        responseMessage ||
         error.response?.data?.error ||
         error.message ||
         'An unexpected error occurred. Please try again.',

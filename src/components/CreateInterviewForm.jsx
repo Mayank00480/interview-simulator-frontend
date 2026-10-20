@@ -47,8 +47,8 @@ export default function CreateInterviewForm({ onSubmit }) {
 
   return (
     <section className="create-interview-card" aria-label="Create Interview Form">
-      <Link to="/create-interview" className="back-link">
-        ← Back to Dashboard
+      <Link to="/interviews" className="back-link">
+        ← Back to Interviews
       </Link>
 
       <div className="create-header">

@@ -1,1 +1,1 @@
-export { default } from './CreateInterviewPage';
+export { default } from './InterviewPage';

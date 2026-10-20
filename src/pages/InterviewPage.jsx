@@ -1,0 +1,294 @@
+import React, { useState, useEffect } from 'react';
+import { getInterviews } from '../services';
+
+export default function InterviewPage() {
+  const [interviews, setInterviews] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+
+  const fetchInterviewsList = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await getInterviews();
+      // Handle direct array or wrapped responses ({ interviews: [...] } or { data: [...] })
+      const list = Array.isArray(response)
+        ? response
+        : (response?.interviews || response?.data || response?.results || []);
+      setInterviews(list);
+    } catch (err) {
+      console.error('Failed to load interviews:', err);
+      setError(err?.message || 'Failed to fetch interviews. Please check your connection or backend server.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchInterviewsList();
+  }, []);
+
+  // Filter interviews by search query and status filter
+  const filteredInterviews = interviews.filter((item) => {
+    const role = (item.jobRole || item.title || item.role || '').toLowerCase();
+    const desc = (item.jobDescription || item.description || '').toLowerCase();
+    const skills = Array.isArray(item.skills)
+      ? item.skills.join(' ').toLowerCase()
+      : (item.skills || '').toLowerCase();
+
+    const matchesSearch =
+      !searchQuery.trim() ||
+      role.includes(searchQuery.toLowerCase()) ||
+      desc.includes(searchQuery.toLowerCase()) ||
+      skills.includes(searchQuery.toLowerCase());
+
+    const status = (item.status || 'Active').toLowerCase();
+    const matchesStatus =
+      statusFilter === 'all' || status === statusFilter.toLowerCase();
+
+    return matchesSearch && matchesStatus;
+  });
+
+  return (
+    <div className="interviews-page">
+      {/* Page Header */}
+      <div className="interviews-page-header">
+        <div className="header-text-group">
+          <h1 className="interviews-page-title">Interviews</h1>
+          <p className="interviews-page-subtitle">
+            Overview of all scheduled, active, and completed technical interview setups.
+          </p>
+        </div>
+      </div>
+
+      {/* Filter and Search Bar */}
+      <div className="interviews-toolbar">
+        <div className="search-bar-wrap">
+          <span className="search-icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2">
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+          </span>
+          <input
+            type="text"
+            className="search-input"
+            placeholder="Search by role, skills, or keywords..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              className="clear-search-btn"
+              onClick={() => setSearchQuery('')}
+              aria-label="Clear search"
+            >
+              ×
+            </button>
+          )}
+        </div>
+
+        <div className="status-tabs">
+          {[
+            { id: 'all', label: 'All' },
+            { id: 'active', label: 'Active' },
+            { id: 'draft', label: 'Draft' },
+            { id: 'completed', label: 'Completed' },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              className={`status-tab ${statusFilter === tab.id ? 'active' : ''}`}
+              onClick={() => setStatusFilter(tab.id)}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Error Notice */}
+      {error && (
+        <div className="interviews-error-card">
+          <div className="error-icon-box">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+          </div>
+          <div className="error-content">
+            <h3>Failed to Load Interviews</h3>
+            <p>{error}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Tabular Data View */}
+      <div className="interviews-table-card">
+        <div className="table-responsive">
+          <table className="interviews-table">
+            <thead>
+              <tr>
+                <th style={{ width: '40px' }}>#</th>
+                <th>Job Role</th>
+                <th>Experience Level</th>
+                <th>Skills Required</th>
+                <th style={{ textAlign: 'center' }}>Duration</th>
+                <th style={{ textAlign: 'center' }}>Questions</th>
+                <th>Expires / Created</th>
+                <th style={{ textAlign: 'center' }}>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                // Shimmering skeleton rows during fetch
+                [1, 2, 3, 4, 5].map((idx) => (
+                  <tr key={idx} className="table-skeleton-row">
+                    <td><div className="skeleton-line" style={{ width: '18px', height: '14px' }} /></td>
+                    <td>
+                      <div className="skeleton-line" style={{ width: '140px', height: '14px', marginBottom: '4px' }} />
+                      <div className="skeleton-line" style={{ width: '80px', height: '10px' }} />
+                    </td>
+                    <td><div className="skeleton-line" style={{ width: '110px', height: '14px' }} /></td>
+                    <td>
+                      <div style={{ display: 'flex', gap: '4px' }}>
+                        <div className="skeleton-pill" style={{ width: '45px', height: '16px' }} />
+                        <div className="skeleton-pill" style={{ width: '50px', height: '16px' }} />
+                      </div>
+                    </td>
+                    <td style={{ textAlign: 'center' }}>
+                      <div className="skeleton-line" style={{ width: '45px', height: '14px', margin: '0 auto' }} />
+                    </td>
+                    <td style={{ textAlign: 'center' }}>
+                      <div className="skeleton-line" style={{ width: '35px', height: '14px', margin: '0 auto' }} />
+                    </td>
+                    <td><div className="skeleton-line" style={{ width: '80px', height: '14px' }} /></td>
+                    <td style={{ textAlign: 'center' }}>
+                      <div className="skeleton-pill" style={{ width: '55px', height: '18px', margin: '0 auto' }} />
+                    </td>
+                  </tr>
+                ))
+              ) : filteredInterviews.length === 0 ? (
+                <tr>
+                  <td colSpan="8" className="empty-table-cell">
+                    <div className="table-empty-state">
+                      <div className="empty-table-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2f6bff" strokeWidth="1.6">
+                          <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+                          <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+                        </svg>
+                      </div>
+                      <h4>{searchQuery ? 'No matching interviews found' : 'No interviews recorded'}</h4>
+                      <p>
+                        {searchQuery
+                          ? `No interview setup matches "${searchQuery}". Try modifying your search criteria.`
+                          : 'There are currently no interview records available from the server.'}
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                filteredInterviews.map((item, index) => {
+                  const role = item.jobRole || item.title || item.role || 'Technical Interview';
+                  const exp = item.experienceLevel || item.experience || 'All Levels';
+                  const desc = item.jobDescription || item.description || '';
+                  const rawSkills = item.skills;
+                  const skills = Array.isArray(rawSkills)
+                    ? rawSkills
+                    : typeof rawSkills === 'string' && rawSkills.trim()
+                      ? rawSkills.split(',').map((s) => s.trim())
+                      : [];
+                  const duration = item.duration || 30;
+                  const questionsCount = item.questionsCount || item.questions?.length || 5;
+                  const status = (item.status || 'Active').toLowerCase();
+                  const dateVal = item.expiresAt || item.createdAt;
+                  const formattedDate = dateVal
+                    ? new Date(dateVal).toLocaleDateString(undefined, {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                    })
+                    : '—';
+                  const id = item._id || item.id || index;
+
+                  return (
+                    <tr key={id} className="interview-table-row">
+                      {/* # Index */}
+                      <td className="cell-index">{index + 1}</td>
+
+                      {/* Job Role & Description */}
+                      <td className="cell-role">
+                        <div className="role-cell-content">
+                          <span className="role-name" title={role}>{role}</span>
+                          {desc && (
+                            <span className="role-desc-snippet" title={desc}>
+                              {desc}
+                            </span>
+                          )}
+                        </div>
+                      </td>
+
+                      {/* Experience Level */}
+                      <td className="cell-exp">
+                        <span className="exp-badge">{exp}</span>
+                      </td>
+
+                      {/* Skills */}
+                      <td className="cell-skills">
+                        <div className="skills-inline-list">
+                          {skills.length > 0 ? (
+                            <>
+                              {skills.slice(0, 3).map((skill, sIdx) => (
+                                <span key={sIdx} className="table-skill-pill">
+                                  {skill}
+                                </span>
+                              ))}
+                              {skills.length > 3 && (
+                                <span className="table-skill-pill more" title={skills.slice(3).join(', ')}>
+                                  +{skills.length - 3}
+                                </span>
+                              )}
+                            </>
+                          ) : (
+                            <span className="text-muted">—</span>
+                          )}
+                        </div>
+                      </td>
+
+                      {/* Duration */}
+                      <td className="cell-duration" style={{ textAlign: 'center' }}>
+                        <span className="duration-pill">{duration}m</span>
+                      </td>
+
+                      {/* Questions Count */}
+                      <td className="cell-questions" style={{ textAlign: 'center' }}>
+                        <span className="questions-pill">{questionsCount} Qs</span>
+                      </td>
+
+                      {/* Date */}
+                      <td className="cell-date">
+                        <span className="date-text">{formattedDate}</span>
+                      </td>
+
+                      {/* Status */}
+                      <td className="cell-status" style={{ textAlign: 'center' }}>
+                        <span className={`status-badge ${status}`}>
+                          <span className="status-dot" />
+                          {status.charAt(0).toUpperCase() + status.slice(1)}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}

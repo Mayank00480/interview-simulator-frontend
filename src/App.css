@@ -2000,4 +2000,120 @@ input[type="date"].form-input::-webkit-calendar-picker-indicator {
   100% { background-position: -200% 0; }
 }
 
+/* ==========================================================================
+   Toast Notification Styles
+   ========================================================================== */
+
+.toast-portal-container {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 380px;
+  width: calc(100% - 48px);
+  pointer-events: none;
+}
+
+.toast-notification {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow:
+    0 10px 25px -5px rgba(15, 23, 42, 0.12),
+    0 4px 10px -2px rgba(15, 23, 42, 0.04),
+    0 0 0 1px rgba(226, 232, 240, 0.8);
+  border: 1px solid #e2e8f0;
+  animation: toastSlideIn 0.26s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.2s ease;
+}
+
+@keyframes toastSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-14px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.toast-notification.toast-success {
+  border-color: #a7f3d0;
+}
+.toast-notification.toast-success .toast-icon-wrap {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.toast-notification.toast-error {
+  border-color: #fecaca;
+}
+.toast-notification.toast-error .toast-icon-wrap {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.toast-notification.toast-info {
+  border-color: #bfdbfe;
+}
+.toast-notification.toast-info .toast-icon-wrap {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.toast-icon-wrap {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.toast-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.toast-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #0f172a;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.toast-message {
+  font-size: 11.5px;
+  color: #475569;
+  margin: 0;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.toast-close-btn {
+  background: none;
+  border: none;
+  font-size: 16px;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+  border-radius: 4px;
+  transition: color 0.15s ease;
+}
+
+.toast-close-btn:hover {
+  color: #1e293b;
+}
+
 

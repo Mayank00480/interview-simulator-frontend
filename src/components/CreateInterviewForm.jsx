@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
-export default function CreateInterviewForm({ onSubmit }) {
+export default function CreateInterviewForm({ onSubmit, loading = false }) {
   const [skills, setSkills] = useState(['React', 'Node.js', 'MongoDB']);
   const [newSkill, setNewSkill] = useState('');
   const [formData, setFormData] = useState({
@@ -9,7 +9,8 @@ export default function CreateInterviewForm({ onSubmit }) {
     experienceLevel: '',
     jobDescription: '',
     duration: 30,
-    questionsCount: 5,
+    questionCount: 4,
+    questionsCount: 4,
     expiresAt: '',
   });
 
@@ -31,7 +32,8 @@ export default function CreateInterviewForm({ onSubmit }) {
       experienceLevel: '',
       jobDescription: '',
       duration: 30,
-      questionsCount: 5,
+      questionCount: 4,
+      questionsCount: 4,
       expiresAt: '',
     });
   };
@@ -39,9 +41,24 @@ export default function CreateInterviewForm({ onSubmit }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (onSubmit) {
-      onSubmit({ ...formData, skills });
-    } else {
-      alert('Interview setup created successfully in draft mode!');
+      let formattedExpiresAt = formData.expiresAt;
+      if (formData.expiresAt) {
+        try {
+          formattedExpiresAt = new Date(formData.expiresAt).toISOString();
+        } catch {
+          formattedExpiresAt = formData.expiresAt;
+        }
+      }
+
+      onSubmit({
+        jobRole: formData.jobRole.trim(),
+        jobDescription: formData.jobDescription.trim(),
+        skills,
+        experienceLevel: formData.experienceLevel,
+        duration: Number(formData.duration) || 30,
+        questionCount: Number(formData.questionCount || formData.questionsCount) || 4,
+        expiresAt: formattedExpiresAt,
+      });
     }
   };
 
@@ -95,10 +112,10 @@ export default function CreateInterviewForm({ onSubmit }) {
                 required
               >
                 <option value="">Select experience level</option>
-                <option value="Entry Level (0-2 yrs)">Entry Level (0-2 yrs)</option>
-                <option value="Mid Level (2-5 yrs)">Mid Level (2-5 yrs)</option>
-                <option value="Senior Level (5+ yrs)">Senior Level (5+ yrs)</option>
-                <option value="Lead / Architect (8+ yrs)">Lead / Architect (8+ yrs)</option>
+                <option value="Fresher">Fresher</option>
+                <option value="Junior">Junior</option>
+                <option value="Mid-Level">Mid-Level</option>
+                <option value="Senior">Senior</option>
               </select>
               <span className="select-chevron">▾</span>
             </div>
@@ -261,12 +278,17 @@ export default function CreateInterviewForm({ onSubmit }) {
             type="button"
             className="cancel-btn"
             onClick={handleReset}
+            disabled={loading}
           >
             Cancel
           </button>
-          <button type="submit" className="submit-button create-submit-btn">
-            <span>Create Interview</span>
-            <span>→</span>
+          <button
+            type="submit"
+            className="submit-button create-submit-btn"
+            disabled={loading}
+          >
+            <span>{loading ? 'Creating...' : 'Create Interview'}</span>
+            <span>{loading ? '⏳' : '→'}</span>
           </button>
         </div>
       </form>

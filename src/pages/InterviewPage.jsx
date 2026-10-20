@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getInterviews } from '../services';
+import { useToast } from '../context/ToastContext';
 
 export default function InterviewPage() {
   const [interviews, setInterviews] = useState([]);
@@ -7,6 +8,7 @@ export default function InterviewPage() {
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
+  const { showToast } = useToast();
 
   const normalizeStatus = (status) => {
     const upper = (status || 'DRAFT').toUpperCase();
@@ -27,7 +29,9 @@ export default function InterviewPage() {
       setInterviews(list);
     } catch (err) {
       console.error('Failed to load interviews:', err);
-      setError(err?.message || 'Failed to fetch interviews. Please check your connection or backend server.');
+      const errMsg = err?.message || 'Failed to fetch interviews. Please check your connection or backend server.';
+      setError(errMsg);
+      showToast(errMsg, 'error');
     } finally {
       setLoading(false);
     }

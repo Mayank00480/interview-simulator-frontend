@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getInterviews } from '../services';
 import { useToast } from '../context/ToastContext';
+import JobDescriptionModal from '../components/JobDescriptionModal';
 
 export default function InterviewPage() {
   const [interviews, setInterviews] = useState([]);
@@ -8,6 +9,7 @@ export default function InterviewPage() {
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
+  const [selectedInterviewForJD, setSelectedInterviewForJD] = useState(null);
   const { showToast } = useToast();
 
   const normalizeStatus = (status) => {
@@ -162,20 +164,20 @@ export default function InterviewPage() {
         </div>
       )}
 
-      {/* Tabular Data View */}
+      {/* Tabular Data View: Reduced width, no horizontal scrollbar, clean fit */}
       <div className="interviews-table-card">
         <div className="table-responsive">
           <table className="interviews-table">
             <thead>
               <tr>
-                <th style={{ width: '40px' }}>#</th>
-                <th>Job Role</th>
-                <th>Experience Level</th>
-                <th>Skills Required</th>
-                <th style={{ textAlign: 'center' }}>Duration</th>
-                <th style={{ textAlign: 'center' }}>Questions</th>
-                <th>Expires / Created</th>
-                <th style={{ textAlign: 'center' }}>Status</th>
+                <th style={{ width: '20%' }}>Job Role</th>
+                <th style={{ width: '13%' }}>Experience Level</th>
+                <th style={{ width: '20%' }}>Skills Required</th>
+                <th style={{ width: '8%', textAlign: 'center' }}>Duration</th>
+                <th style={{ width: '8%', textAlign: 'center' }}>Questions</th>
+                <th style={{ width: '12%' }}>Expires / Created</th>
+                <th style={{ width: '10%', textAlign: 'center' }}>Status</th>
+                <th style={{ width: '9%', textAlign: 'center' }}>Action</th>
               </tr>
             </thead>
             <tbody>
@@ -183,12 +185,11 @@ export default function InterviewPage() {
                 // Shimmering skeleton rows during fetch
                 [1, 2, 3, 4, 5].map((idx) => (
                   <tr key={idx} className="table-skeleton-row">
-                    <td><div className="skeleton-line" style={{ width: '18px', height: '14px' }} /></td>
                     <td>
-                      <div className="skeleton-line" style={{ width: '140px', height: '14px', marginBottom: '4px' }} />
-                      <div className="skeleton-line" style={{ width: '80px', height: '10px' }} />
+                      <div className="skeleton-line" style={{ width: '110px', height: '14px', marginBottom: '4px' }} />
+                      <div className="skeleton-line" style={{ width: '55px', height: '12px' }} />
                     </td>
-                    <td><div className="skeleton-line" style={{ width: '110px', height: '14px' }} /></td>
+                    <td><div className="skeleton-line" style={{ width: '70px', height: '14px' }} /></td>
                     <td>
                       <div style={{ display: 'flex', gap: '4px' }}>
                         <div className="skeleton-pill" style={{ width: '45px', height: '16px' }} />
@@ -196,14 +197,17 @@ export default function InterviewPage() {
                       </div>
                     </td>
                     <td style={{ textAlign: 'center' }}>
-                      <div className="skeleton-line" style={{ width: '45px', height: '14px', margin: '0 auto' }} />
+                      <div className="skeleton-line" style={{ width: '38px', height: '14px', margin: '0 auto' }} />
                     </td>
                     <td style={{ textAlign: 'center' }}>
-                      <div className="skeleton-line" style={{ width: '35px', height: '14px', margin: '0 auto' }} />
+                      <div className="skeleton-line" style={{ width: '32px', height: '14px', margin: '0 auto' }} />
                     </td>
-                    <td><div className="skeleton-line" style={{ width: '80px', height: '14px' }} /></td>
+                    <td><div className="skeleton-line" style={{ width: '75px', height: '14px' }} /></td>
                     <td style={{ textAlign: 'center' }}>
                       <div className="skeleton-pill" style={{ width: '55px', height: '18px', margin: '0 auto' }} />
+                    </td>
+                    <td style={{ textAlign: 'center' }}>
+                      <div className="skeleton-pill" style={{ width: '26px', height: '26px', borderRadius: '7px', margin: '0 auto' }} />
                     </td>
                   </tr>
                 ))
@@ -230,7 +234,6 @@ export default function InterviewPage() {
                 filteredInterviews.map((item, index) => {
                   const role = item.jobRole || item.title || item.role || 'Technical Interview';
                   const exp = item.experienceLevel || item.experience || 'All Levels';
-                  const desc = item.jobDescription || item.description || '';
                   const rawSkills = item.skills;
                   const skills = Array.isArray(rawSkills)
                     ? rawSkills
@@ -238,7 +241,7 @@ export default function InterviewPage() {
                       ? rawSkills.split(',').map((s) => s.trim())
                       : [];
                   const duration = item.duration || 30;
-                  const questionsCount = item.questionsCount || item.questions?.length || 5;
+                  const questionsCount = item.questionCount || item.questionsCount || item.questions?.length || 4;
                   const status = normalizeStatus(item.status);
                   const dateVal = item.expiresAt || item.createdAt;
                   const formattedDate = dateVal
@@ -252,19 +255,11 @@ export default function InterviewPage() {
 
                   return (
                     <tr key={id} className="interview-table-row">
-                      {/* # Index */}
-                      <td className="cell-index">{index + 1}</td>
-
-                      {/* Job Role & Description */}
+                      {/* Job Role */}
                       <td className="cell-role">
-                        <div className="role-cell-content">
-                          <span className="role-name" title={role}>{role}</span>
-                          {desc && (
-                            <span className="role-desc-snippet" title={desc}>
-                              {desc}
-                            </span>
-                          )}
-                        </div>
+                        <span className="role-name" title={role}>
+                          {role}
+                        </span>
                       </td>
 
                       {/* Experience Level */}
@@ -277,14 +272,18 @@ export default function InterviewPage() {
                         <div className="skills-inline-list">
                           {skills.length > 0 ? (
                             <>
-                              {skills.slice(0, 3).map((skill, sIdx) => (
-                                <span key={sIdx} className="table-skill-pill">
+                              {skills.slice(0, 2).map((skill, sIdx) => (
+                                <span key={sIdx} className="table-skill-pill" title={skill}>
                                   {skill}
                                 </span>
                               ))}
-                              {skills.length > 3 && (
-                                <span className="table-skill-pill more" title={skills.slice(3).join(', ')}>
-                                  +{skills.length - 3}
+                              {skills.length > 2 && (
+                                <span
+                                  className="table-skill-pill more"
+                                  title={skills.slice(2).join(', ')}
+                                  onClick={() => setSelectedInterviewForJD(item)}
+                                >
+                                  +{skills.length - 2}
                                 </span>
                               )}
                             </>
@@ -316,6 +315,22 @@ export default function InterviewPage() {
                           {status}
                         </span>
                       </td>
+
+                      {/* Action - Eye button to view Job Description in popup */}
+                      <td className="cell-action" style={{ textAlign: 'center' }}>
+                        <button
+                          type="button"
+                          className="action-eye-btn"
+                          onClick={() => setSelectedInterviewForJD(item)}
+                          title="View Job Description"
+                          aria-label={`View Job Description for ${role}`}
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                            <circle cx="12" cy="12" r="3" />
+                          </svg>
+                        </button>
+                      </td>
                     </tr>
                   );
                 })
@@ -324,6 +339,12 @@ export default function InterviewPage() {
           </table>
         </div>
       </div>
+
+      {/* Job Description Popup Modal (Separate Component) */}
+      <JobDescriptionModal
+        interview={selectedInterviewForJD}
+        onClose={() => setSelectedInterviewForJD(null)}
+      />
     </div>
   );
 }

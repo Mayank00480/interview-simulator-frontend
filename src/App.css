@@ -1,0 +1,705 @@
+/* ==========================================================================
+   AI Interview Simulator — Responsive & Compact Styles
+   ========================================================================== */
+
+/* Outer Page Wrapper */
+.auth-page-wrapper {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: linear-gradient(135deg, #e4effd 0%, #edf4fc 45%, #e0effd 100%);
+  overflow: hidden;
+}
+
+/* Atmospheric Ambient Blobs */
+.bg-shape {
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+  border-radius: 50%;
+  filter: blur(70px);
+}
+
+.bg-shape-1 {
+  width: 450px;
+  height: 450px;
+  top: -100px;
+  right: -80px;
+  background: radial-gradient(circle, rgba(193, 219, 255, 0.8) 0%, rgba(220, 237, 255, 0) 70%);
+}
+
+.bg-shape-2 {
+  width: 450px;
+  height: 450px;
+  bottom: -100px;
+  left: -80px;
+  background: radial-gradient(circle, rgba(200, 225, 255, 0.7) 0%, rgba(220, 237, 255, 0) 70%);
+}
+
+.bg-shape-3 {
+  width: 320px;
+  height: 320px;
+  top: 35%;
+  left: 25%;
+  background: radial-gradient(circle, rgba(225, 240, 255, 0.5) 0%, rgba(255, 255, 255, 0) 70%);
+}
+
+/* Main Split Card Shell */
+.auth-card-shell {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 940px;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow:
+    0 16px 45px -12px rgba(27, 72, 175, 0.12),
+    0 4px 16px -4px rgba(0, 0, 0, 0.02),
+    0 0 0 1px rgba(225, 236, 252, 0.8);
+  overflow: hidden;
+}
+
+.auth-card-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.95fr;
+  align-items: stretch;
+}
+
+/* ==========================================================================
+   Left Panel: Branding, Value Prop & Hero
+   ========================================================================== */
+
+.auth-grid-left {
+  position: relative;
+  background: linear-gradient(155deg, #f2f7fe 0%, #e7f2fd 55%, #f0f6ff 100%);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-right: 1px solid rgba(223, 235, 250, 0.7);
+}
+
+.auth-illustration {
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 28px 0 28px;
+}
+
+.illustration-ambient-wave {
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+  border-radius: 50%;
+}
+
+.illustration-ambient-wave--top {
+  width: 350px;
+  height: 320px;
+  top: -120px;
+  right: -100px;
+  background: radial-gradient(ellipse at center, rgba(215, 235, 255, 0.6) 0%, rgba(240, 248, 255, 0) 70%);
+}
+
+.illustration-ambient-wave--bottom {
+  width: 450px;
+  height: 380px;
+  bottom: -150px;
+  left: -150px;
+  background: radial-gradient(ellipse at center, rgba(210, 232, 255, 0.7) 0%, rgba(240, 248, 255, 0) 70%);
+}
+
+/* Brand Header */
+.brand-header {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.brand-logo-wrap {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.brand-logo-img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #102144;
+  letter-spacing: -0.2px;
+  line-height: 1.2;
+}
+
+.brand-subtitle {
+  font-size: 11px;
+  font-weight: 500;
+  color: #687e9f;
+  margin-top: 1px;
+}
+
+/* Hero Content */
+.hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 380px;
+}
+
+.hero-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: #0d1e3d;
+  line-height: 1.22;
+  letter-spacing: -0.4px;
+  margin-bottom: 8px;
+}
+
+.hero-description {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #556c8d;
+  margin-bottom: 16px;
+}
+
+/* Features List */
+.features-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.feature-icon-badge {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #e1eeff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(47, 107, 255, 0.08);
+}
+
+.feature-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.feature-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.feature-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #112448;
+  line-height: 1.25;
+}
+
+.feature-desc {
+  font-size: 11px;
+  color: #6c819f;
+}
+
+/* Hero Visual Area & Annotation Callout */
+.hero-visual-container {
+  position: relative;
+  z-index: 2;
+  margin-top: auto;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+}
+
+.hero-person-img {
+  width: 100%;
+  max-width: 280px;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  margin-right: -8px;
+  margin-bottom: -4px;
+  filter: drop-shadow(0 10px 20px rgba(27, 72, 175, 0.08));
+}
+
+/* Callout Speech Badge */
+.practice-callout {
+  position: absolute;
+  top: 10px;
+  right: 125px;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  pointer-events: none;
+}
+
+.callout-bubble {
+  background: #ffffff;
+  border: 1.5px solid #d4e4fc;
+  border-radius: 10px;
+  padding: 6px 10px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #2f6bff;
+  line-height: 1.3;
+  box-shadow: 0 4px 12px -2px rgba(47, 107, 255, 0.14);
+  white-space: nowrap;
+}
+
+.callout-bubble span {
+  color: #245be5;
+}
+
+.callout-arrow {
+  margin-top: 1px;
+  margin-right: 14px;
+  width: 22px;
+  height: 25px;
+}
+
+/* ==========================================================================
+   Right Panel: Form Column
+   ========================================================================== */
+
+.auth-grid-right {
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 26px 30px;
+}
+
+.auth-form-card {
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Form Header */
+.auth-form-header {
+  margin-bottom: 18px;
+}
+
+.welcome-tag {
+  display: inline-block;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #2f6bff;
+  margin-bottom: 3px;
+}
+
+.form-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #0d1e3d;
+  letter-spacing: -0.3px;
+  line-height: 1.25;
+  margin-bottom: 4px;
+}
+
+.form-subtitle {
+  font-size: 12.5px;
+  color: #6e84a4;
+  line-height: 1.4;
+}
+
+/* Form Groups & Inputs */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #102144;
+  margin-bottom: 5px;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border: 1.5px solid #dfe6f1;
+  border-radius: 9px;
+  transition: all 0.2s ease;
+}
+
+.input-wrapper:hover {
+  border-color: #cbd7e8;
+}
+
+.input-wrapper:focus-within {
+  border-color: #2f6bff;
+  box-shadow: 0 0 0 3px rgba(47, 107, 255, 0.12);
+}
+
+.input-icon-left {
+  position: absolute;
+  left: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.input-icon-left img {
+  width: 15px;
+  height: 15px;
+  opacity: 0.85;
+}
+
+.form-input {
+  width: 100%;
+  height: 38px;
+  padding: 0 12px 0 36px;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 13px;
+  color: #0f1e3d;
+}
+
+.form-input::placeholder {
+  color: #94a3b8;
+  font-size: 12.5px;
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background 0.15s;
+}
+
+.password-toggle-btn:hover {
+  background: #f1f5f9;
+}
+
+.eye-icon {
+  width: 15px;
+  height: 15px;
+  opacity: 0.65;
+  transition: opacity 0.2s;
+}
+
+.eye-icon.eye-active,
+.password-toggle-btn:hover .eye-icon {
+  opacity: 1;
+}
+
+/* Primary Submit Button */
+.submit-button {
+  width: 100%;
+  height: 38px;
+  background: #2f6bff;
+  border: none;
+  border-radius: 9px;
+  color: #ffffff;
+  font-size: 13.5px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  cursor: pointer;
+  margin-top: 4px;
+  transition: all 0.2s ease;
+  box-shadow: 0 3px 10px rgba(47, 107, 255, 0.22);
+}
+
+.submit-button:hover {
+  background: #215eef;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(47, 107, 255, 0.3);
+}
+
+.submit-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(47, 107, 255, 0.2);
+}
+
+.btn-arrow-icon {
+  width: 14px;
+  height: 14px;
+  filter: brightness(0) invert(1);
+  transition: transform 0.2s ease;
+}
+
+.submit-button:hover .btn-arrow-icon {
+  transform: translateX(3px);
+}
+
+/* Divider */
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 14px 0 10px 0;
+}
+
+.divider-line {
+  flex: 1;
+  height: 1px;
+  background: #e5ebf4;
+}
+
+.divider-text {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #9aa8bc;
+  letter-spacing: 0.6px;
+}
+
+/* Footer Link / Toggle */
+.auth-footer {
+  text-align: center;
+  font-size: 12.5px;
+  color: #64748b;
+}
+
+.auth-switch-link,
+.auth-toggle-btn {
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: inherit;
+  color: #2f6bff;
+  font-weight: 600;
+  margin-left: 4px;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.2s;
+}
+
+.auth-switch-link:hover,
+.auth-toggle-btn:hover {
+  color: #1e55e3;
+  text-decoration: underline;
+}
+
+/* ==========================================================================
+   Dashboard Page
+   ========================================================================== */
+
+.dashboard-card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 520px;
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 32px 28px;
+  text-align: center;
+  box-shadow: 0 16px 40px -10px rgba(47, 107, 255, 0.12), 0 0 1px 1px rgba(225, 236, 252, 0.8);
+}
+
+.dashboard-logo {
+  width: 44px;
+  height: 44px;
+  margin-bottom: 12px;
+}
+
+.dashboard-header h1 {
+  font-size: 22px;
+  color: #0d1e3d;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.dashboard-header p {
+  color: #687e9f;
+  font-size: 13px;
+  margin-bottom: 22px;
+}
+
+.dashboard-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.dash-stat-box {
+  background: #f3f8fe;
+  border: 1px solid #e2edfb;
+  border-radius: 11px;
+  padding: 12px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.dash-stat-number {
+  font-size: 19px;
+  font-weight: 800;
+  color: #2f6bff;
+}
+
+.dash-stat-label {
+  font-size: 10.5px;
+  color: #6b81a1;
+  font-weight: 600;
+}
+
+.dashboard-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.logout-button {
+  background: transparent;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 9px;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 600;
+  height: 38px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.logout-button:hover {
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+/* ==========================================================================
+   Responsive Breakpoints
+   ========================================================================== */
+
+/* Tablet & Smaller Laptops */
+@media (max-width: 860px) {
+  .auth-card-shell {
+    max-width: 520px;
+  }
+
+  .auth-card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-grid-left {
+    border-right: none;
+    border-bottom: 1px solid rgba(223, 235, 250, 0.7);
+  }
+
+  .auth-illustration {
+    padding: 24px 24px 0 24px;
+  }
+
+  .hero-visual-container {
+    justify-content: center;
+  }
+
+  .hero-person-img {
+    max-width: 240px;
+    margin-right: 0;
+  }
+
+  .practice-callout {
+    right: 35px;
+    top: 5px;
+  }
+
+  .auth-grid-right {
+    padding: 24px;
+  }
+}
+
+/* Mobile Screens */
+@media (max-width: 480px) {
+  .auth-page-wrapper {
+    padding: 10px;
+  }
+
+  .auth-card-shell {
+    border-radius: 16px;
+  }
+
+  .auth-illustration {
+    padding: 18px 16px 0 16px;
+  }
+
+  .hero-title {
+    font-size: 20px;
+  }
+
+  .brand-title {
+    font-size: 14px;
+  }
+
+  .practice-callout {
+    display: none; /* Hide annotation callout on small mobile to avoid cramped overlay */
+  }
+
+  .hero-person-img {
+    max-width: 190px;
+  }
+
+  .auth-grid-right {
+    padding: 20px 16px;
+  }
+
+  .form-title {
+    font-size: 20px;
+  }
+
+  .input-wrapper {
+    border-radius: 8px;
+  }
+
+  .form-input {
+    height: 36px;
+    font-size: 12.5px;
+  }
+
+  .submit-button {
+    height: 36px;
+    font-size: 13px;
+  }
+}

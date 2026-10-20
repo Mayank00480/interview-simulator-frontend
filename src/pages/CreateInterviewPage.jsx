@@ -1,6 +1,5 @@
 import React from 'react';
 import CreateInterviewForm from '../components/CreateInterviewForm';
-import CreateInterviewSidePanel from '../components/CreateInterviewSidePanel';
 
 export default function CreateInterviewPage() {
   const handleInterviewSubmit = (interviewData) => {
@@ -10,11 +9,7 @@ export default function CreateInterviewPage() {
 
   return (
     <div className="create-interview-page-wrapper">
-      {/* Left Column Form */}
       <CreateInterviewForm onSubmit={handleInterviewSubmit} />
-
-      {/* Right Column Highlights & Graphic */}
-      <CreateInterviewSidePanel />
     </div>
   );
 }

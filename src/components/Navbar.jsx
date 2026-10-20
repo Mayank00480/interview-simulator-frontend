@@ -10,9 +10,14 @@ export default function Navbar({ user, onLogout }) {
   return (
     <header className="app-navbar">
       <div className="nav-brand">
-        <img src={logo} alt="Logo" className="nav-logo" />
+        <div className="nav-logo-box">
+          <img src={logo} alt="Logo" className="nav-logo" />
+        </div>
         <div className="nav-brand-text">
-          <span className="nav-title">AI Interview Simulator</span>
+          <div className="nav-title-row">
+            <span className="nav-title">AI Interview Simulator</span>
+            <span className="nav-tag">Recruiter Pro</span>
+          </div>
           <span className="nav-subtitle">Smarter Practice. Better Opportunities.</span>
         </div>
       </div>
@@ -25,7 +30,10 @@ export default function Navbar({ user, onLogout }) {
           aria-expanded={showDropdown}
         >
           <span className="user-avatar">{initial}</span>
-          <span className="user-name">{displayName}</span>
+          <div className="user-meta">
+            <span className="user-name">{displayName}</span>
+            <span className="user-role">Admin</span>
+          </div>
           <span className="user-arrow">▾</span>
         </button>
 
@@ -41,6 +49,11 @@ export default function Navbar({ user, onLogout }) {
               className="dropdown-item logout"
               onClick={onLogout}
             >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
               Sign Out
             </button>
           </div>
@@ -49,3 +62,4 @@ export default function Navbar({ user, onLogout }) {
     </header>
   );
 }
+

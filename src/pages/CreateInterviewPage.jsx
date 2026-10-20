@@ -33,14 +33,13 @@ export default function CreateInterviewPage() {
   const handleSubmit = (e) => {
     e.preventDefault();
     alert('Interview setup created successfully in draft mode!');
-    navigate('/dashboard');
   };
 
   return (
-    <div className="layout-content-card create-interview-layout">
-      {/* Left: Form Area */}
-      <div className="create-interview-form-col">
-        <Link to="/dashboard" className="back-link">
+    <div className="create-interview-page-wrapper">
+      {/* Left Column: Standalone White Card Form */}
+      <section className="create-interview-card" aria-label="Create Interview Form">
+        <Link to="/create-interview" className="back-link">
           ← Back to Dashboard
         </Link>
 
@@ -50,11 +49,17 @@ export default function CreateInterviewPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="interview-form">
+          {/* Row 1: Job Role & Experience Level */}
           <div className="form-row-2">
             <div className="form-group">
               <label className="form-label">Job Role *</label>
               <div className="input-wrapper">
-                <span className="input-icon-left">💼</span>
+                <span className="input-icon-left">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+                  </svg>
+                </span>
                 <input
                   type="text"
                   className="form-input"
@@ -68,8 +73,13 @@ export default function CreateInterviewPage() {
 
             <div className="form-group">
               <label className="form-label">Experience Level *</label>
-              <div className="input-wrapper">
-                <span className="input-icon-left">👤</span>
+              <div className="input-wrapper select-wrapper">
+                <span className="input-icon-left">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                  </svg>
+                </span>
                 <select
                   className="form-input form-select"
                   value={formData.experienceLevel}
@@ -80,64 +90,97 @@ export default function CreateInterviewPage() {
                   <option value="Entry Level (0-2 yrs)">Entry Level (0-2 yrs)</option>
                   <option value="Mid Level (2-5 yrs)">Mid Level (2-5 yrs)</option>
                   <option value="Senior Level (5+ yrs)">Senior Level (5+ yrs)</option>
+                  <option value="Lead / Architect (8+ yrs)">Lead / Architect (8+ yrs)</option>
                 </select>
+                <span className="select-chevron">▾</span>
               </div>
             </div>
           </div>
 
-          {/* Job Description */}
-          <div className="form-group">
-            <label className="form-label">Job Description *</label>
-            <div className="textarea-wrapper">
-              <textarea
-                className="form-textarea"
-                rows="4"
-                maxLength="2000"
-                placeholder="Enter job description..."
-                value={formData.jobDescription}
-                onChange={(e) => setFormData({ ...formData, jobDescription: e.target.value })}
-                required
-              />
-              <span className="char-count">{formData.jobDescription.length}/2000</span>
-            </div>
-          </div>
-
-          {/* Skills */}
-          <div className="form-group">
-            <label className="form-label">Skills *</label>
-            <div className="input-wrapper">
-              <span className="input-icon-left">🏷️</span>
-              <input
-                type="text"
-                className="form-input"
-                placeholder="Add skills (e.g. React, Node.js, MongoDB)"
-                value={newSkill}
-                onChange={(e) => setNewSkill(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleAddSkill(e)}
-              />
-            </div>
-            <div className="skills-tags-wrap">
-              {skills.map((skill) => (
-                <span key={skill} className="skill-pill">
-                  {skill}
-                  <button type="button" onClick={() => handleRemoveSkill(skill)}>×</button>
+          {/* Row 2: Job Description & Skills */}
+          <div className="form-row-2">
+            <div className="form-group">
+              <label className="form-label">Job Description *</label>
+              <div className="textarea-wrapper">
+                <span className="textarea-icon-left">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="16" y1="13" x2="8" y2="13" />
+                    <line x1="16" y1="17" x2="8" y2="17" />
+                    <polyline points="10 9 9 9 8 9" />
+                  </svg>
                 </span>
-              ))}
-              {newSkill.trim() && (
-                <button type="button" className="add-skill-btn" onClick={handleAddSkill}>
-                  + Add
-                </button>
-              )}
+                <textarea
+                  className="form-textarea"
+                  rows="4"
+                  maxLength="2000"
+                  placeholder="Enter job description..."
+                  value={formData.jobDescription}
+                  onChange={(e) => setFormData({ ...formData, jobDescription: e.target.value })}
+                  required
+                />
+                <span className="char-count">{formData.jobDescription.length}/2000</span>
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Skills *</label>
+              <div className="input-wrapper">
+                <span className="input-icon-left">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+                    <line x1="7" y1="7" x2="7.01" y2="7" />
+                  </svg>
+                </span>
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder="Add skills (e.g. React, Node.js, MongoDB)"
+                  value={newSkill}
+                  onChange={(e) => setNewSkill(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleAddSkill(e)}
+                />
+              </div>
+
+              {/* Skills Tag Pills */}
+              <div className="skills-tags-wrap">
+                {skills.map((skill) => (
+                  <span key={skill} className="skill-pill">
+                    {skill}
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveSkill(skill)}
+                      aria-label={`Remove ${skill}`}
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))}
+                {newSkill.trim() && (
+                  <button type="button" className="add-skill-btn" onClick={handleAddSkill}>
+                    + Add
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
+          {/* Row 3: Duration & Questions count */}
           <div className="form-row-2">
             <div className="form-group">
               <label className="form-label">Duration (minutes) *</label>
               <div className="input-wrapper">
-                <span className="input-icon-left">⏱️</span>
+                <span className="input-icon-left">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                  </svg>
+                </span>
                 <input
                   type="number"
+                  min="5"
+                  max="120"
                   className="form-input"
                   placeholder="e.g. 30"
                   value={formData.duration}
@@ -150,9 +193,20 @@ export default function CreateInterviewPage() {
             <div className="form-group">
               <label className="form-label">Number of Questions *</label>
               <div className="input-wrapper">
-                <span className="input-icon-left">📋</span>
+                <span className="input-icon-left">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="8" y1="6" x2="21" y2="6" />
+                    <line x1="8" y1="12" x2="21" y2="12" />
+                    <line x1="8" y1="18" x2="21" y2="18" />
+                    <line x1="3" y1="6" x2="3.01" y2="6" />
+                    <line x1="3" y1="12" x2="3.01" y2="12" />
+                    <line x1="3" y1="18" x2="3.01" y2="18" />
+                  </svg>
+                </span>
                 <input
                   type="number"
+                  min="1"
+                  max="30"
                   className="form-input"
                   placeholder="e.g. 5"
                   value={formData.questionsCount}
@@ -163,53 +217,88 @@ export default function CreateInterviewPage() {
             </div>
           </div>
 
-          {/* Expires At */}
+          {/* Row 4: Expires At */}
           <div className="form-group">
             <label className="form-label">Expires At *</label>
             <div className="input-wrapper">
-              <span className="input-icon-left">📅</span>
+              <span className="input-icon-left">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                  <line x1="16" y1="2" x2="16" y2="6" />
+                  <line x1="8" y1="2" x2="8" y2="6" />
+                  <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+              </span>
               <input
                 type="date"
                 className="form-input"
+                placeholder="Select date and time"
                 value={formData.expiresAt}
                 onChange={(e) => setFormData({ ...formData, expiresAt: e.target.value })}
               />
+              <span className="input-icon-right">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="1.8">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                  <line x1="16" y1="2" x2="16" y2="6" />
+                  <line x1="8" y1="2" x2="8" y2="6" />
+                  <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+              </span>
             </div>
           </div>
 
-          {/* Informational Callout */}
-          <div className="info-banner">
-            <span className="info-icon">ℹ️</span>
-            <span>The interview will be created in draft mode. You can generate questions, review them and then publish the interview when ready.</span>
-          </div>
 
-          {/* Footer Buttons */}
+          {/* Form Actions Buttons */}
           <div className="form-actions-row">
-            <button type="button" className="cancel-btn" onClick={() => navigate('/dashboard')}>
+            <button
+              type="button"
+              className="cancel-btn"
+              onClick={() => {
+                setFormData({
+                  jobRole: '',
+                  experienceLevel: '',
+                  jobDescription: '',
+                  duration: 30,
+                  questionsCount: 5,
+                  expiresAt: '',
+                });
+              }}
+            >
               Cancel
             </button>
             <button type="submit" className="submit-button create-submit-btn">
-              Create Interview →
+              <span>Create Interview</span>
+              <span>→</span>
             </button>
           </div>
         </form>
-      </div>
+      </section>
 
-      {/* Right: Graphic & "What you'll get" */}
-      <div className="create-interview-side-col">
+      {/* Right Column: Directly on ambient background (NO white card wrapper!) */}
+      <aside className="create-interview-right-panel" aria-label="Feature Highlights">
+        {/* Top Annotation Quote */}
         <div className="side-quote-top">
-          <p>Great interviews<br />build great teams</p>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M4 4C14 6 18 16 16 20" stroke="#2F6BFF" strokeWidth="1.8" strokeLinecap="round" />
-            <path d="M12 18L16 21L19 16" stroke="#2F6BFF" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+          <p>
+            Great interviews<br />
+            build great teams
+          </p>
+          <svg width="28" height="32" viewBox="0 0 28 32" fill="none" aria-hidden="true">
+            <path d="M4 4C16 8 22 18 19 25" stroke="#2F6BFF" strokeWidth="1.8" strokeLinecap="round" />
+            <path d="M14 21L19 26L23 20" stroke="#2F6BFF" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
 
-        <img src={heroImage} alt="" className="side-hero-img" />
+        {/* Hero Candidate Illustration */}
+        <img
+          src={heroImage}
+          alt="Candidate practicing interview"
+          className="side-hero-img"
+        />
 
+        {/* "What you'll get" Translucent Feature Box */}
         <div className="what-you-get-box">
           <div className="wyg-header">
-            <span>✨</span>
+            <span className="wyg-star-icon">✩</span>
             <h4>What you'll get</h4>
           </div>
 
@@ -217,7 +306,7 @@ export default function CreateInterviewPage() {
             <div className="wyg-icon-badge">
               <img src={sparklesIcon} alt="" />
             </div>
-            <div>
+            <div className="wyg-info">
               <strong>AI Generated Questions</strong>
               <p>Role-specific and skill-focused questions using Gemini.</p>
             </div>
@@ -227,7 +316,7 @@ export default function CreateInterviewPage() {
             <div className="wyg-icon-badge">
               <img src={micIcon} alt="" />
             </div>
-            <div>
+            <div className="wyg-info">
               <strong>Voice-Based Interviews</strong>
               <p>Real-world experience with voice responses.</p>
             </div>
@@ -237,21 +326,26 @@ export default function CreateInterviewPage() {
             <div className="wyg-icon-badge">
               <img src={chartIcon} alt="" />
             </div>
-            <div>
+            <div className="wyg-info">
               <strong>Detailed Evaluation</strong>
               <p>Skill-wise and overall performance reports.</p>
             </div>
           </div>
         </div>
 
+        {/* Bottom Annotation Quote */}
         <div className="side-quote-bottom">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M20 4C10 6 6 16 8 20" stroke="#2F6BFF" strokeWidth="1.8" strokeLinecap="round" />
-            <path d="M5 16L8 21L12 18" stroke="#2F6BFF" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+          <svg width="28" height="32" viewBox="0 0 28 32" fill="none" aria-hidden="true">
+            <path d="M24 4C12 8 6 18 9 25" stroke="#2F6BFF" strokeWidth="1.8" strokeLinecap="round" />
+            <path d="M5 21L9 26L14 21" stroke="#2F6BFF" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
-          <p>Better practice<br />leads to bigger<br />opportunities</p>
+          <p>
+            Better practice<br />
+            leads to bigger<br />
+            opportunities
+          </p>
         </div>
-      </div>
+      </aside>
     </div>
   );
 }

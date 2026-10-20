@@ -6,7 +6,14 @@ export default function InterviewPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('ALL');
+
+  const normalizeStatus = (status) => {
+    const upper = (status || 'DRAFT').toUpperCase();
+    if (upper === 'PUBLISHED' || upper === 'ACTIVE') return 'PUBLISHED';
+    if (upper === 'CLOSED' || upper === 'COMPLETED' || upper === 'EXPIRED') return 'CLOSED';
+    return 'DRAFT';
+  };
 
   const fetchInterviewsList = async () => {
     setLoading(true);
@@ -30,6 +37,24 @@ export default function InterviewPage() {
     fetchInterviewsList();
   }, []);
 
+  // Compute status counts for tabs
+  const statusCounts = interviews.reduce(
+    (acc, item) => {
+      acc.ALL += 1;
+      const s = normalizeStatus(item.status);
+      acc[s] = (acc[s] || 0) + 1;
+      return acc;
+    },
+    { ALL: 0, DRAFT: 0, PUBLISHED: 0, CLOSED: 0 }
+  );
+
+  const STATUS_TABS = [
+    { id: 'ALL', label: 'All', count: statusCounts.ALL, dotColor: null },
+    { id: 'DRAFT', label: 'Draft', count: statusCounts.DRAFT, dotColor: '#f59e0b' },
+    { id: 'PUBLISHED', label: 'Published', count: statusCounts.PUBLISHED, dotColor: '#10b981' },
+    { id: 'CLOSED', label: 'Closed', count: statusCounts.CLOSED, dotColor: '#94a3b8' },
+  ];
+
   // Filter interviews by search query and status filter
   const filteredInterviews = interviews.filter((item) => {
     const role = (item.jobRole || item.title || item.role || '').toLowerCase();
@@ -44,9 +69,9 @@ export default function InterviewPage() {
       desc.includes(searchQuery.toLowerCase()) ||
       skills.includes(searchQuery.toLowerCase());
 
-    const status = (item.status || 'Active').toLowerCase();
+    const itemStatus = normalizeStatus(item.status);
     const matchesStatus =
-      statusFilter === 'all' || status === statusFilter.toLowerCase();
+      statusFilter === 'ALL' || itemStatus === statusFilter;
 
     return matchesSearch && matchesStatus;
   });
@@ -63,8 +88,32 @@ export default function InterviewPage() {
         </div>
       </div>
 
-      {/* Filter and Search Bar */}
+      {/* Filter and Search Bar: Tabs on Left, Search on Right */}
       <div className="interviews-toolbar">
+        {/* Left: Status Tabs */}
+        <div className="status-tabs" role="tablist" aria-label="Filter by status">
+          {STATUS_TABS.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              className={`status-tab ${statusFilter === tab.id ? 'active' : ''}`}
+              onClick={() => setStatusFilter(tab.id)}
+              role="tab"
+              aria-selected={statusFilter === tab.id}
+            >
+              {tab.dotColor && (
+                <span
+                  className="tab-indicator-dot"
+                  style={{ backgroundColor: tab.dotColor }}
+                />
+              )}
+              <span>{tab.label}</span>
+              <span className="tab-count-badge">{tab.count}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Right: Search Input */}
         <div className="search-bar-wrap">
           <span className="search-icon">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2">
@@ -89,24 +138,6 @@ export default function InterviewPage() {
               ×
             </button>
           )}
-        </div>
-
-        <div className="status-tabs">
-          {[
-            { id: 'all', label: 'All' },
-            { id: 'active', label: 'Active' },
-            { id: 'draft', label: 'Draft' },
-            { id: 'completed', label: 'Completed' },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              className={`status-tab ${statusFilter === tab.id ? 'active' : ''}`}
-              onClick={() => setStatusFilter(tab.id)}
-            >
-              {tab.label}
-            </button>
-          ))}
         </div>
       </div>
 
@@ -204,7 +235,7 @@ export default function InterviewPage() {
                       : [];
                   const duration = item.duration || 30;
                   const questionsCount = item.questionsCount || item.questions?.length || 5;
-                  const status = (item.status || 'Active').toLowerCase();
+                  const status = normalizeStatus(item.status);
                   const dateVal = item.expiresAt || item.createdAt;
                   const formattedDate = dateVal
                     ? new Date(dateVal).toLocaleDateString(undefined, {
@@ -276,9 +307,9 @@ export default function InterviewPage() {
 
                       {/* Status */}
                       <td className="cell-status" style={{ textAlign: 'center' }}>
-                        <span className={`status-badge ${status}`}>
+                        <span className={`status-badge ${status.toLowerCase()}`}>
                           <span className="status-dot" />
-                          {status.charAt(0).toUpperCase() + status.slice(1)}
+                          {status}
                         </span>
                       </td>
                     </tr>

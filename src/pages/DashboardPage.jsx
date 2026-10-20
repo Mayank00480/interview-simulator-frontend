@@ -1,15 +1,20 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import logo from '../assets/logo.svg';
+import { logoutUser } from '../services';
 
 export default function DashboardPage() {
   const navigate = useNavigate();
   const rawUser = localStorage.getItem('simulator_user');
-  const user = rawUser ? JSON.parse(rawUser) : { name: 'Candidate', email: 'user@example.com' };
+  const user = rawUser
+    ? JSON.parse(rawUser)
+    : { username: 'Candidate', email: 'user@example.com' };
 
-  const handleLogout = () => {
-    localStorage.removeItem('simulator_user');
-    navigate('/login');
+  const displayName = user.username || user.name || 'Candidate';
+
+  const handleLogout = async () => {
+    await logoutUser();
+    navigate('/');
   };
 
   return (
@@ -20,8 +25,8 @@ export default function DashboardPage() {
       <main className="dashboard-card">
         <div className="dashboard-header">
           <img src={logo} alt="Logo" className="dashboard-logo" />
-          <h1>Welcome, {user.name}!</h1>
-          <p>Your AI Interview Simulator dashboard is ready.</p>
+          <h1>Welcome, {displayName}!</h1>
+          <p>{user.email}</p>
         </div>
 
         <div className="dashboard-stats-grid">

@@ -6,12 +6,22 @@ import api from './api';
  * @returns {Promise<Object>} Response data
  */
 export async function signupUser({ username, email, password }) {
-  const response = await api.post('/users/signup', {
-    username,
-    email,
-    password,
-  });
-  return response.data;
+  try {
+    const response = await api.post('/users/signup', {
+      username,
+      email,
+      password,
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Signup API error:', error);
+    const message =
+      error.response?.data?.message ||
+      error.response?.data?.error ||
+      error.message ||
+      'Failed to create account. Please try again.';
+    throw new Error(message);
+  }
 }
 
 /**
@@ -20,25 +30,42 @@ export async function signupUser({ username, email, password }) {
  * @returns {Promise<Object>} Response data
  */
 export async function loginUser({ username, email, password }) {
-  const response = await api.post('/users/login', {
-    username,
-    email,
-    password,
-  });
-  return response.data;
+  try {
+    const response = await api.post('/users/login', {
+      username,
+      email,
+      password,
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Login API error:', error);
+    const message =
+      error.response?.data?.message ||
+      error.response?.data?.error ||
+      error.message ||
+      'Failed to log in. Please check your credentials.';
+    throw new Error(message);
+  }
 }
 
 /**
  * Log out user and clear session cookies
- * @returns {Promise<void>}
+ * @returns {Promise<Object|void>}
  */
 export async function logoutUser() {
   try {
-    await api.post('/users/logout');
+    const response = await api.post('/users/logout');
+    return response.data;
   } catch (error) {
-    // If logout endpoint is not implemented on backend, proceed with client cleanup
-    console.warn('Backend logout warning:', error.message);
+    console.error('Logout API error:', error);
+    const message =
+      error.response?.data?.message ||
+      error.response?.data?.error ||
+      error.message ||
+      'Failed to log out.';
+    console.warn('Backend logout warning:', message);
   } finally {
+    // Ensure client cleanup happens regardless of API outcome
     localStorage.removeItem('simulator_user');
   }
 }

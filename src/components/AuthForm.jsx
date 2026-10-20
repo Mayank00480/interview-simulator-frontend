@@ -83,6 +83,7 @@ export default function AuthForm() {
         navigate('/dashboard');
       }, 500);
     } catch (err) {
+      console.error('Form submission error:', err);
       setErrorMsg(err.message || 'Authentication failed. Please verify your credentials.');
     } finally {
       setIsLoading(false);

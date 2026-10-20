@@ -13,8 +13,13 @@ export default function DashboardPage() {
   const displayName = user.username || user.name || 'Candidate';
 
   const handleLogout = async () => {
-    await logoutUser();
-    navigate('/');
+    try {
+      await logoutUser();
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      navigate('/');
+    }
   };
 
   return (

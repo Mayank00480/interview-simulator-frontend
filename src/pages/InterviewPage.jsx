@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getInterviews } from '../services';
 import { useToast } from '../context/ToastContext';
 import JobDescriptionModal from '../components/JobDescriptionModal';
 
 export default function InterviewPage() {
+  const navigate = useNavigate();
   const [interviews, setInterviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -81,6 +83,13 @@ export default function InterviewPage() {
 
     return matchesSearch && matchesStatus;
   });
+
+  const handleOpenCandidates = (item) => {
+    const targetId = item._id || item.id;
+    if (targetId) {
+      navigate(`/interviews/${targetId}/candidates`, { state: { interview: item } });
+    }
+  };
 
   return (
     <div className="interviews-page">
@@ -254,12 +263,22 @@ export default function InterviewPage() {
                   const id = item._id || item.id || index;
 
                   return (
-                    <tr key={id} className="interview-table-row">
+                    <tr
+                      key={id}
+                      className="interview-table-row clickable-row"
+                      onClick={() => handleOpenCandidates(item)}
+                      title="Click to view candidates for this interview"
+                    >
                       {/* Job Role */}
                       <td className="cell-role">
-                        <span className="role-name" title={role}>
-                          {role}
-                        </span>
+                        <div className="role-title-wrap">
+                          <span className="role-name role-clickable" title={role}>
+                            {role}
+                          </span>
+                          <span className="view-candidates-tag">
+                            View Candidates &rarr;
+                          </span>
+                        </div>
                       </td>
 
                       {/* Experience Level */}
@@ -281,7 +300,10 @@ export default function InterviewPage() {
                                 <span
                                   className="table-skill-pill more"
                                   title={skills.slice(2).join(', ')}
-                                  onClick={() => setSelectedInterviewForJD(item)}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedInterviewForJD(item);
+                                  }}
                                 >
                                   +{skills.length - 2}
                                 </span>
@@ -316,20 +338,42 @@ export default function InterviewPage() {
                         </span>
                       </td>
 
-                      {/* Action - Eye button to view Job Description in popup */}
+                      {/* Action - Candidates & Eye buttons */}
                       <td className="cell-action" style={{ textAlign: 'center' }}>
-                        <button
-                          type="button"
-                          className="action-eye-btn"
-                          onClick={() => setSelectedInterviewForJD(item)}
-                          title="View Job Description"
-                          aria-label={`View Job Description for ${role}`}
-                        >
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                            <circle cx="12" cy="12" r="3" />
-                          </svg>
-                        </button>
+                        <div className="table-actions-group">
+                          <button
+                            type="button"
+                            className="action-candidates-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpenCandidates(item);
+                            }}
+                            title="View Candidates"
+                            aria-label={`View Candidates for ${role}`}
+                          >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                              <circle cx="9" cy="7" r="4" />
+                              <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                            </svg>
+                          </button>
+                          <button
+                            type="button"
+                            className="action-eye-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedInterviewForJD(item);
+                            }}
+                            title="View Job Description"
+                            aria-label={`View Job Description for ${role}`}
+                          >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                              <circle cx="12" cy="12" r="3" />
+                            </svg>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );

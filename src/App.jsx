@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import AuthPage from './pages/AuthPage';
 import CreateInterviewPage from './pages/CreateInterviewPage';
 import InterviewPage from './pages/InterviewPage';
+import InterviewCandidatesPage from './pages/InterviewCandidatesPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import AppLayout from './components/AppLayout';
 import { ToastProvider } from './context/ToastContext';
@@ -25,7 +26,8 @@ function App() {
             }
           >
             <Route path="/interviews" element={<InterviewPage />} />
-            <Route path="/interview" element={<InterviewPage />} />
+            <Route path="/interviews/:interviewId/candidates" element={<InterviewCandidatesPage />} />
+            <Route path="/interviews/:interviewId" element={<InterviewCandidatesPage />} />
             <Route path="/create-interview" element={<CreateInterviewPage />} />
             <Route path="/dashboard" element={<Navigate to="/interviews" replace />} />
           </Route>

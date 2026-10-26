@@ -25,16 +25,6 @@ export async function getInterviews(params = {}) {
 /**
  * Create a new interview
  * Endpoint: POST http://localhost:3000/api/interviews
- * 
- * @param {Object} interviewData
- * @param {string} interviewData.jobRole
- * @param {string} interviewData.jobDescription
- * @param {string[]} interviewData.skills
- * @param {string} interviewData.experienceLevel
- * @param {number} interviewData.duration
- * @param {number} interviewData.questionCount
- * @param {string} interviewData.expiresAt
- * @returns {Promise<any>} Response data
  */
 export async function createInterview(interviewData) {
   try {
@@ -47,6 +37,21 @@ export async function createInterview(interviewData) {
       error.response?.data?.error ||
       error.message ||
       'Failed to create interview.';
+    throw new Error(message);
+  }
+}
+
+export async function getInterviewSessions(interviewId) {
+  try {
+    const response = await api.get(`/interviews/${interviewId}/sessions`);
+    return response.data?.sessions || [];
+  } catch (error) {
+    console.error('Get interview sessions error:', error);
+    const message =
+      error.response?.data?.message ||
+      error.response?.data?.error ||
+      error.message ||
+      'Failed to fetch candidates for this interview.';
     throw new Error(message);
   }
 }

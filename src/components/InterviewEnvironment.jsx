@@ -13,25 +13,11 @@ export default function InterviewEnvironment({ session, questions = [], intervie
   const totalQuestionsCount = (questions && questions.length > 0) ? questions.length * 2 : 8;
 
   // Main questions list
-  const [mainQuestions] = useState(questions);
-  const [currentMainIndex, setCurrentMainIndex] = useState(0);
-
-  // Active question currently being asked
-  const [activeQuestion, setActiveQuestion] = useState(questions[0] || null);
-
-  // Answer text
-  const [answer, setAnswer] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-
-  // Completion states
-  const [readyToComplete, setReadyToComplete] = useState(false);
-  const [completing, setCompleting] = useState(false);
-  const [isCompleted, setIsCompleted] = useState(false);
-  const [completedSessionData, setCompletedSessionData] = useState(null);
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const mainQuestions = questions || [];
 
   // Completed history: restored from sessionStorage if available
   const [history, setHistory] = useState(() => {
+    if (!sessionId) return [];
     try {
       const saved = sessionStorage.getItem(`candidate_history_${sessionId}`);
       return saved ? JSON.parse(saved) : [];
@@ -40,13 +26,185 @@ export default function InterviewEnvironment({ session, questions = [], intervie
     }
   });
 
+  // Current main question index
+  const [currentMainIndex, setCurrentMainIndex] = useState(() => {
+    if (!sessionId) return 0;
+    try {
+      const saved = sessionStorage.getItem(`candidate_main_idx_${sessionId}`);
+      if (saved !== null && !isNaN(parseInt(saved, 10))) {
+        return parseInt(saved, 10);
+      }
+      const histRaw = sessionStorage.getItem(`candidate_history_${sessionId}`);
+      if (histRaw) {
+        const hist = JSON.parse(histRaw);
+        return Math.min(hist.filter(h => !h.isFollowUp).length, Math.max(0, (questions?.length || 1) - 1));
+      }
+    } catch {}
+    return 0;
+  });
+
+  // Active question currently being asked
+  const [activeQuestion, setActiveQuestion] = useState(() => {
+    if (sessionId) {
+      try {
+        const savedQ = sessionStorage.getItem(`candidate_active_q_${sessionId}`);
+        if (savedQ) {
+          const parsed = JSON.parse(savedQ);
+          if (parsed && (parsed.questionText || parsed._id)) {
+            return parsed;
+          }
+        }
+        const histRaw = sessionStorage.getItem(`candidate_history_${sessionId}`);
+        if (histRaw) {
+          const hist = JSON.parse(histRaw);
+          const mainCount = hist.filter(h => !h.isFollowUp).length;
+          if (questions && questions[mainCount]) {
+            return questions[mainCount];
+          }
+        }
+      } catch {}
+    }
+    return questions[0] || null;
+  });
+
+  // Ensure activeQuestion is assigned once questions become available
+  useEffect(() => {
+    if (!activeQuestion && questions && questions.length > 0) {
+      if (sessionId) {
+        try {
+          const savedQ = sessionStorage.getItem(`candidate_active_q_${sessionId}`);
+          if (savedQ) {
+            const parsed = JSON.parse(savedQ);
+            if (parsed && (parsed.questionText || parsed._id)) {
+              setActiveQuestion(parsed);
+              return;
+            }
+          }
+        } catch {}
+      }
+      setActiveQuestion(questions[currentMainIndex] || questions[0]);
+    }
+  }, [questions, activeQuestion, sessionId, currentMainIndex]);
+
+  // Answer text: restore draft if present
+  const [answer, setAnswer] = useState(() => {
+    if (!sessionId) return '';
+    try {
+      return sessionStorage.getItem(`candidate_answer_${sessionId}`) || '';
+    } catch {
+      return '';
+    }
+  });
+  const [submitting, setSubmitting] = useState(false);
+
+  // Completion states
+  const [readyToComplete, setReadyToComplete] = useState(() => {
+    if (!sessionId) return false;
+    try {
+      return sessionStorage.getItem(`candidate_ready_${sessionId}`) === 'true';
+    } catch {
+      return false;
+    }
+  });
+  const [completing, setCompleting] = useState(false);
+
+  const [isCompleted, setIsCompleted] = useState(() => {
+    if (!sessionId) return false;
+    try {
+      return sessionStorage.getItem(`candidate_completed_${sessionId}`) === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const [completedSessionData, setCompletedSessionData] = useState(() => {
+    if (!sessionId) return null;
+    try {
+      const saved = sessionStorage.getItem(`candidate_completed_data_${sessionId}`);
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+
   // Audio / Speech State
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef(null);
 
-  // Countdown timer in seconds
-  const [timeLeft, setTimeLeft] = useState(durationMinutes * 60);
+  // Countdown timer in seconds: restore remaining time
+  const [timeLeft, setTimeLeft] = useState(() => {
+    if (sessionId) {
+      try {
+        const saved = sessionStorage.getItem(`candidate_time_left_${sessionId}`);
+        if (saved !== null) {
+          const parsed = parseInt(saved, 10);
+          if (!isNaN(parsed) && parsed > 0) {
+            return parsed;
+          }
+        }
+      } catch {}
+    }
+    return durationMinutes * 60;
+  });
+
+  // Synchronize state changes to sessionStorage for resilience on refresh
+  useEffect(() => {
+    if (sessionId && activeQuestion) {
+      try {
+        sessionStorage.setItem(`candidate_active_q_${sessionId}`, JSON.stringify(activeQuestion));
+      } catch {}
+    }
+  }, [sessionId, activeQuestion]);
+
+  useEffect(() => {
+    if (sessionId) {
+      try {
+        sessionStorage.setItem(`candidate_main_idx_${sessionId}`, String(currentMainIndex));
+      } catch {}
+    }
+  }, [sessionId, currentMainIndex]);
+
+  useEffect(() => {
+    if (sessionId) {
+      try {
+        sessionStorage.setItem(`candidate_ready_${sessionId}`, String(readyToComplete));
+      } catch {}
+    }
+  }, [sessionId, readyToComplete]);
+
+  useEffect(() => {
+    if (sessionId && isCompleted) {
+      try {
+        sessionStorage.setItem(`candidate_completed_${sessionId}`, 'true');
+        if (completedSessionData) {
+          sessionStorage.setItem(`candidate_completed_data_${sessionId}`, JSON.stringify(completedSessionData));
+        }
+      } catch {}
+    }
+  }, [sessionId, isCompleted, completedSessionData]);
+
+  useEffect(() => {
+    if (sessionId && timeLeft > 0 && !isCompleted && !readyToComplete) {
+      try {
+        sessionStorage.setItem(`candidate_time_left_${sessionId}`, String(timeLeft));
+      } catch {}
+    }
+  }, [sessionId, timeLeft, isCompleted, readyToComplete]);
+
+  useEffect(() => {
+    if (sessionId) {
+      try {
+        if (answer) {
+          sessionStorage.setItem(`candidate_answer_${sessionId}`, answer);
+        } else {
+          sessionStorage.removeItem(`candidate_answer_${sessionId}`);
+        }
+      } catch {}
+    }
+  }, [sessionId, answer]);
 
   // Timer Countdown
   useEffect(() => {
@@ -86,9 +244,10 @@ export default function InterviewEnvironment({ session, questions = [], intervie
       setIsCompleted(true);
       if (sessionId) {
         try {
-          sessionStorage.removeItem(`candidate_history_${sessionId}`);
-          sessionStorage.removeItem(`candidate_session_${session?.interviewId || ''}_${sessionId}`);
-          sessionStorage.removeItem(`candidate_session_${session?.interviewId || ''}`);
+          sessionStorage.setItem(`candidate_completed_${sessionId}`, 'true');
+          sessionStorage.setItem(`candidate_completed_data_${sessionId}`, JSON.stringify(sessionData));
+          sessionStorage.removeItem(`candidate_active_q_${sessionId}`);
+          sessionStorage.removeItem(`candidate_answer_${sessionId}`);
         } catch {
           // ignore
         }
@@ -103,6 +262,11 @@ export default function InterviewEnvironment({ session, questions = [], intervie
       showToast(msg, 'error');
       // Transition to completed so candidate is not stranded
       setIsCompleted(true);
+      if (sessionId) {
+        try {
+          sessionStorage.setItem(`candidate_completed_${sessionId}`, 'true');
+        } catch {}
+      }
     } finally {
       setCompleting(false);
     }
@@ -300,22 +464,44 @@ export default function InterviewEnvironment({ session, questions = [], intervie
 
       // Check for follow-up question
       if (!activeQuestion.isFollowUp && result?.followUp && result.followUp.questionText) {
-        setActiveQuestion({
+        const nextFollowUp = {
           ...result.followUp,
           isFollowUp: true,
           parentQuestionOrder: currentMainIndex + 1,
-        });
+        };
+        setActiveQuestion(nextFollowUp);
         setAnswer('');
+        if (sessionId) {
+          try {
+            sessionStorage.setItem(`candidate_active_q_${sessionId}`, JSON.stringify(nextFollowUp));
+            sessionStorage.removeItem(`candidate_answer_${sessionId}`);
+          } catch {}
+        }
       } else {
         // If we just answered a follow-up (or if no follow-up was provided), move to next main question
         const nextIndex = currentMainIndex + 1;
         if (nextIndex < mainQuestions.length) {
           setCurrentMainIndex(nextIndex);
-          setActiveQuestion(mainQuestions[nextIndex]);
+          const nextQ = mainQuestions[nextIndex];
+          setActiveQuestion(nextQ);
           setAnswer('');
+          if (sessionId) {
+            try {
+              sessionStorage.setItem(`candidate_main_idx_${sessionId}`, String(nextIndex));
+              sessionStorage.setItem(`candidate_active_q_${sessionId}`, JSON.stringify(nextQ));
+              sessionStorage.removeItem(`candidate_answer_${sessionId}`);
+            } catch {}
+          }
         } else {
           // All questions completed! Prompt user to complete interview
           setReadyToComplete(true);
+          if (sessionId) {
+            try {
+              sessionStorage.setItem(`candidate_ready_${sessionId}`, 'true');
+              sessionStorage.removeItem(`candidate_active_q_${sessionId}`);
+              sessionStorage.removeItem(`candidate_answer_${sessionId}`);
+            } catch {}
+          }
           showToast('All questions answered! You can now complete your interview.', 'success');
         }
       }
@@ -543,9 +729,9 @@ export default function InterviewEnvironment({ session, questions = [], intervie
                 Question {Math.min(history.length + 1, totalQuestionsCount)} of {totalQuestionsCount}
               </span>
 
-              {activeQuestion?.skill && (
+              {(activeQuestion?.skill || mainQuestions[currentMainIndex]?.skill) && (
                 <span className="ie-q-skill-badge">
-                  🎯 {activeQuestion.skill}
+                  🎯 {activeQuestion?.skill || mainQuestions[currentMainIndex]?.skill}
                 </span>
               )}
             </div>

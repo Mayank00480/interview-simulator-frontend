@@ -28,9 +28,17 @@ export default function CandidateSessionPage() {
         const raw = sessionStorage.getItem(`candidate_session_${interviewId}_${sessionId}`);
         if (raw) cached = JSON.parse(raw);
       }
+      if (!cached && sessionId) {
+        const rawSid = sessionStorage.getItem(`candidate_session_${sessionId}`);
+        if (rawSid) cached = JSON.parse(rawSid);
+      }
       if (!cached && interviewId) {
         const rawLast = sessionStorage.getItem(`candidate_session_${interviewId}`);
         if (rawLast) cached = JSON.parse(rawLast);
+      }
+      if (!cached) {
+        const rawAny = sessionStorage.getItem('last_candidate_session');
+        if (rawAny) cached = JSON.parse(rawAny);
       }
 
       if (cached && cached.session && Array.isArray(cached.questions) && cached.questions.length > 0) {
@@ -38,7 +46,7 @@ export default function CandidateSessionPage() {
         setSessionQuestions(cached.questions);
 
         const sid = cached.session._id || cached.session.id;
-        if (sid && !sessionId) {
+        if (sid && !sessionId && interviewId) {
           navigate(`/candidate-session/${interviewId}/${sid}`, { replace: true });
         }
       }
@@ -78,9 +86,13 @@ export default function CandidateSessionPage() {
       if (interviewId && sid) {
         sessionStorage.setItem(`candidate_session_${interviewId}_${sid}`, JSON.stringify(cachePayload));
       }
+      if (sid) {
+        sessionStorage.setItem(`candidate_session_${sid}`, JSON.stringify(cachePayload));
+      }
       if (interviewId) {
         sessionStorage.setItem(`candidate_session_${interviewId}`, JSON.stringify(cachePayload));
       }
+      sessionStorage.setItem('last_candidate_session', JSON.stringify(cachePayload));
 
       setActiveSession(sessionData);
       setSessionQuestions(questionsList);

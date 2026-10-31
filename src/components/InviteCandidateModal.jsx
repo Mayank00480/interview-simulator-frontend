@@ -13,7 +13,7 @@ export default function InviteCandidateModal({ interview, onClose, onInviteSucce
 
   const interviewId = interview?._id || interview?.id || 'demo';
   const role = interview?.jobRole || interview?.title || 'Technical Role';
-  const inviteLink = `${window.location.origin}/interviews/${interviewId}`;
+  const inviteLink = `${window.location.origin}/candidate-session/${interviewId}`;
 
   const handleCopyLink = () => {
     navigator.clipboard?.writeText(inviteLink);

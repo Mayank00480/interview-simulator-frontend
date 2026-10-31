@@ -4,6 +4,7 @@ import AuthPage from './pages/AuthPage';
 import CreateInterviewPage from './pages/CreateInterviewPage';
 import InterviewPage from './pages/InterviewPage';
 import InterviewCandidatesPage from './pages/InterviewCandidatesPage';
+import CandidateSessionPage from './pages/CandidateSessionPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import AppLayout from './components/AppLayout';
 import { ToastProvider } from './context/ToastContext';
@@ -16,6 +17,10 @@ function App() {
         <Routes>
           {/* Authentication Route */}
           <Route path="/" element={<AuthPage />} />
+
+          {/* Public Candidate Session Routes (No recruiter authentication required) */}
+          <Route path="/candidate-session/:interviewId" element={<CandidateSessionPage />} />
+          <Route path="/interview-session/:interviewId" element={<CandidateSessionPage />} />
 
           {/* Protected App Routes inside AppLayout */}
           <Route

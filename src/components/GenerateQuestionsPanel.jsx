@@ -8,10 +8,20 @@ export default function GenerateQuestionsPanel({ interview, onSwitchToCreate }) 
   const [generating, setGenerating] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [isPublished, setIsPublished] = useState(interview?.status === 'PUBLISHED');
+  const [copiedLink, setCopiedLink] = useState(false);
   const { showToast } = useToast();
   const navigate = useNavigate();
 
   const interviewId = interview?._id || interview?.id;
+  const sessionUrl = interviewId ? `${window.location.origin}/candidate-session/${interviewId}` : '';
+
+  const handleCopyLink = () => {
+    if (!sessionUrl) return;
+    navigator.clipboard?.writeText(sessionUrl);
+    setCopiedLink(true);
+    showToast('Candidate session URL copied to clipboard!', 'success');
+    setTimeout(() => setCopiedLink(false), 2500);
+  };
 
   const handleGenerate = async () => {
     if (!interviewId) {
@@ -119,6 +129,44 @@ export default function GenerateQuestionsPanel({ interview, onSwitchToCreate }) 
           </div>
         )}
       </div>
+
+      {/* Candidate Session URL Box */}
+      {interviewId && (
+        <div className="gqp-share-session-card">
+          <div className="gqp-share-header">
+            <span className="gqp-share-icon">🔗</span>
+            <div className="gqp-share-text">
+              <strong>Candidate Session URL</strong>
+              <p>Direct link for candidates to register and take this technical interview.</p>
+            </div>
+          </div>
+          <div className="gqp-share-input-row">
+            <input
+              type="text"
+              readOnly
+              value={sessionUrl}
+              className="gqp-share-input"
+              onClick={(e) => e.target.select()}
+            />
+            <button
+              type="button"
+              className="gqp-share-copy-btn"
+              onClick={handleCopyLink}
+            >
+              {copiedLink ? '✓ Copied' : 'Copy Session URL'}
+            </button>
+            <a
+              href={sessionUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="gqp-share-open-btn"
+              title="Open session portal in new tab"
+            >
+              Open ↗
+            </a>
+          </div>
+        </div>
+      )}
 
       {/* When no questions yet */}
       {questions.length === 0 && (

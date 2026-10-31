@@ -30,12 +30,20 @@ api.interceptors.response.use(
         (typeof responseMessage === 'string' &&
           /access\s*denied|forbidden|unauthorized/i.test(responseMessage));
 
-      // Clear session and redirect to login page
+      // Clear session and redirect to login page (skip redirect if on public candidate session page)
       if (isAccessDenied) {
         localStorage.removeItem('simulator_user');
 
-        // Redirect if not already on the login page
-        if (window.location.pathname !== '/' && window.location.pathname !== '/login') {
+        const isCandidatePath =
+          window.location.pathname.includes('/candidate-session') ||
+          window.location.pathname.includes('/interview-session');
+
+        // Redirect if not already on the login page and not on candidate session page
+        if (
+          window.location.pathname !== '/' &&
+          window.location.pathname !== '/login' &&
+          !isCandidatePath
+        ) {
           window.location.href = '/';
         }
       }

@@ -156,6 +156,25 @@ export async function submitSessionAnswer(sessionId, { questionId, answer }) {
   }
 }
 
+/**
+ * Complete a candidate session
+ * Endpoint: POST http://localhost:3000/api/sessions/:sessionId/complete
+ */
+export async function completeSession(sessionId) {
+  try {
+    const response = await api.post(`/sessions/${sessionId}/complete`);
+    return response.data;
+  } catch (error) {
+    console.error('Complete session error:', error);
+    const message =
+      error.response?.data?.message ||
+      error.response?.data?.error ||
+      error.message ||
+      'Failed to complete interview session.';
+    throw new Error(message);
+  }
+}
+
 export async function getSessionQuestions(sessionId) {
   try {
     const response = await api.get(`/sessions/${sessionId}/questions`);

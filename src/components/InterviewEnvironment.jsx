@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { submitSessionAnswer } from '../services';
+import { submitSessionAnswer, completeSession } from '../services';
 import { useToast } from '../context/ToastContext';
 
 export default function InterviewEnvironment({ session, questions = [], interview, onExit }) {
@@ -20,9 +20,14 @@ export default function InterviewEnvironment({ session, questions = [], intervie
   const [answer, setAnswer] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
+  // Completion states
+  const [readyToComplete, setReadyToComplete] = useState(false);
+  const [completing, setCompleting] = useState(false);
+  const [isCompleted, setIsCompleted] = useState(false);
+  const [completedSessionData, setCompletedSessionData] = useState(null);
+
   // Completed history
   const [history, setHistory] = useState([]);
-  const [isCompleted, setIsCompleted] = useState(false);
 
   // Audio / Speech State
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -34,7 +39,7 @@ export default function InterviewEnvironment({ session, questions = [], intervie
 
   // Timer Countdown
   useEffect(() => {
-    if (isCompleted || timeLeft <= 0) return;
+    if (isCompleted || readyToComplete || timeLeft <= 0) return;
     const interval = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
@@ -46,7 +51,7 @@ export default function InterviewEnvironment({ session, questions = [], intervie
       });
     }, 1000);
     return () => clearInterval(interval);
-  }, [isCompleted, timeLeft]);
+  }, [isCompleted, readyToComplete, timeLeft]);
 
   // Format MM:SS
   const formatTime = (seconds) => {
@@ -56,8 +61,8 @@ export default function InterviewEnvironment({ session, questions = [], intervie
   };
 
   const handleTimeExpired = () => {
-    showToast('Interview duration has expired.', 'warning');
-    setIsCompleted(true);
+    showToast('Interview duration has expired. Please complete your interview.', 'warning');
+    setReadyToComplete(true);
   };
 
   // Text-to-Speech: AI speaks the question
@@ -87,13 +92,13 @@ export default function InterviewEnvironment({ session, questions = [], intervie
 
   // Automatically read new question out loud when it appears
   useEffect(() => {
-    if (activeQuestion?.questionText && !isCompleted) {
+    if (activeQuestion?.questionText && !isCompleted && !readyToComplete) {
       speakQuestion(activeQuestion.questionText);
     }
     return () => {
       stopSpeaking();
     };
-  }, [activeQuestion, isCompleted]);
+  }, [activeQuestion, isCompleted, readyToComplete]);
 
   // Speech Recognition: Candidate can speak answer
   const toggleListening = () => {
@@ -205,9 +210,9 @@ export default function InterviewEnvironment({ session, questions = [], intervie
           setActiveQuestion(mainQuestions[nextIndex]);
           setAnswer('');
         } else {
-          // All main questions and follow-ups are completed!
-          setIsCompleted(true);
-          showToast('Congratulations! You have completed all interview questions.', 'success');
+          // All questions completed! Prompt user to complete interview
+          setReadyToComplete(true);
+          showToast('All questions answered! You can now complete your interview.', 'success');
         }
       }
     } catch (err) {
@@ -222,20 +227,43 @@ export default function InterviewEnvironment({ session, questions = [], intervie
     }
   };
 
-  // COMPLETED SCREEN
-  if (isCompleted) {
+  // Final Complete Interview API call
+  const handleCompleteInterview = async () => {
+    if (!sessionId) {
+      showToast('Session reference missing.', 'error');
+      return;
+    }
+
+    setCompleting(true);
+    try {
+      const response = await completeSession(sessionId);
+      const sessionData = response?.session || response?.data || response;
+      setCompletedSessionData(sessionData);
+      setIsCompleted(true);
+      showToast(response?.message || 'Session completed successfully!', 'success');
+    } catch (err) {
+      console.error('Complete interview error:', err);
+      const msg =
+        err?.response?.data?.message ||
+        err?.message ||
+        'Failed to complete interview session.';
+      showToast(msg, 'error');
+    } finally {
+      setCompleting(false);
+    }
+  };
+
+  // SCREEN 1: READY TO COMPLETE (Shown when all questions are answered)
+  if (readyToComplete && !isCompleted) {
     return (
-      <div className="ie-completed-wrapper">
-        <div className="ie-completed-card">
-          <div className="ie-completed-icon-wrap">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-              <polyline points="22 4 12 14.01 9 11.01" />
-            </svg>
+      <div className="ie-ready-complete-wrapper">
+        <div className="ie-ready-complete-card">
+          <div className="ie-ready-icon-wrap">
+            🎉
           </div>
-          <h2>Interview Completed!</h2>
-          <p className="ie-completed-sub">
-            Thank you, <strong>{candidateName}</strong>. Your responses have been submitted to the recruiter for evaluation.
+          <h2>All Questions Completed!</h2>
+          <p className="ie-ready-desc">
+            Well done, <strong>{candidateName}</strong>! You have answered all {history.length} questions and follow-ups.
           </p>
 
           <div className="ie-completed-stats-row">
@@ -251,28 +279,92 @@ export default function InterviewEnvironment({ session, questions = [], intervie
             </div>
             <div className="ie-stat-card">
               <span className="ie-stat-val">100%</span>
-              <span className="ie-stat-lbl">Completed</span>
+              <span className="ie-stat-lbl">Finished</span>
             </div>
           </div>
 
+          <div className="ie-ready-note">
+            <p>Click below to complete and submit your interview assessment to the recruiter.</p>
+          </div>
+
+          <button
+            type="button"
+            className="submit-button ie-complete-action-btn"
+            onClick={handleCompleteInterview}
+            disabled={completing}
+          >
+            {completing ? (
+              <>
+                <span className="btn-spinner" />
+                <span>Completing Interview...</span>
+              </>
+            ) : (
+              <>
+                <span>Complete Interview</span>
+                <span>✓</span>
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // SCREEN 2: FINAL COMPLETED CONFIRMATION (Scores explicitly NOT shown)
+  if (isCompleted) {
+    const completedAt =
+      completedSessionData?.completedAt ||
+      completedSessionData?.updatedAt ||
+      new Date().toISOString();
+
+    return (
+      <div className="ie-completed-wrapper">
+        <div className="ie-completed-card">
+          <div className="ie-completed-icon-wrap">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+              <polyline points="22 4 12 14.01 9 11.01" />
+            </svg>
+          </div>
+          <h2>Interview Completed Successfully!</h2>
+          <p className="ie-completed-sub">
+            Thank you, <strong>{candidateName}</strong>. Your technical assessment has been submitted to the recruiting team.
+          </p>
+
           <div className="ie-completed-summary">
-            <h4>Assessment Summary</h4>
+            <h4>Assessment Details</h4>
             <div className="ie-summary-item">
-              <span>Role:</span>
-              <strong>{interview?.jobRole || 'Technical Assessment'}</strong>
-            </div>
-            <div className="ie-summary-item">
-              <span>Candidate:</span>
+              <span>Candidate Name:</span>
               <strong>{candidateName}</strong>
             </div>
+            {interview?.jobRole && (
+              <div className="ie-summary-item">
+                <span>Role:</span>
+                <strong>{interview.jobRole}</strong>
+              </div>
+            )}
             <div className="ie-summary-item">
-              <span>Session ID:</span>
+              <span>Session Reference:</span>
               <code>{sessionId}</code>
+            </div>
+            <div className="ie-summary-item">
+              <span>Total Questions:</span>
+              <strong>{history.length}</strong>
             </div>
             <div className="ie-summary-item">
               <span>Status:</span>
               <span className="cs-status-ready">COMPLETED</span>
             </div>
+            <div className="ie-summary-item">
+              <span>Completed Time:</span>
+              <span>{new Date(completedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+            </div>
+          </div>
+
+          <div className="ie-candidate-closing-box">
+            <p>
+              Your responses have been recorded. The hiring team will review your interview assessment and follow up with you regarding next steps.
+            </p>
           </div>
 
           {onExit && (
@@ -285,7 +377,7 @@ export default function InterviewEnvironment({ session, questions = [], intervie
     );
   }
 
-  // ACTIVE INTERVIEW ENVIRONMENT
+  // SCREEN 3: ACTIVE INTERVIEW ENVIRONMENT
   return (
     <div className="interview-env-wrapper">
       {/* Top Session Bar */}
@@ -317,6 +409,22 @@ export default function InterviewEnvironment({ session, questions = [], intervie
               <span className="ie-followup-pill">+ Follow-Up</span>
             )}
           </div>
+
+          {history.length > 0 && (
+            <button
+              type="button"
+              className="ie-top-complete-btn"
+              onClick={() => {
+                if (window.confirm('Are you sure you want to finalize and complete the interview now?')) {
+                  handleCompleteInterview();
+                }
+              }}
+              disabled={completing}
+              title="Finish and submit interview"
+            >
+              Complete Interview ✓
+            </button>
+          )}
         </div>
       </header>
 
@@ -444,7 +552,7 @@ export default function InterviewEnvironment({ session, questions = [], intervie
           </form>
         </section>
 
-        {/* Previous Answer History Strip (Collapsible preview) */}
+        {/* Previous Answer History Strip */}
         {history.length > 0 && (
           <section className="ie-history-section">
             <div className="ie-history-header">
@@ -471,4 +579,3 @@ export default function InterviewEnvironment({ session, questions = [], intervie
     </div>
   );
 }
-

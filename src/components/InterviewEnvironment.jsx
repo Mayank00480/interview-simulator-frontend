@@ -129,10 +129,8 @@ export default function InterviewEnvironment({ session, questions = [], intervie
 
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
-  // Audio / Speech State
+  // Audio / Speech State (AI voice output)
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [isListening, setIsListening] = useState(false);
-  const recognitionRef = useRef(null);
 
   // Countdown timer in seconds: restore remaining time
   const [timeLeft, setTimeLeft] = useState(() => {
@@ -274,10 +272,6 @@ export default function InterviewEnvironment({ session, questions = [], intervie
 
   const handleTimeExpired = () => {
     showToast('Interview duration has expired! Automatically completing and submitting interview...', 'warning');
-    if (isListening && recognitionRef.current) {
-      recognitionRef.current.stop();
-      setIsListening(false);
-    }
     stopSpeaking();
     handleCompleteInterview();
   };
@@ -360,66 +354,12 @@ export default function InterviewEnvironment({ session, questions = [], intervie
     };
   }, [activeQuestion, isCompleted, readyToComplete]);
 
-  // Speech Recognition: Candidate can speak answer
-  const toggleListening = () => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      showToast('Speech recognition not supported in your browser. Please type your answer.', 'error');
-      return;
-    }
-
-    if (isListening) {
-      if (recognitionRef.current) {
-        recognitionRef.current.stop();
-      }
-      setIsListening(false);
-      return;
-    }
-
-    try {
-      const recognition = new SpeechRecognition();
-      recognition.continuous = true;
-      recognition.interimResults = true;
-      recognition.lang = 'en-US';
-
-      recognition.onstart = () => {
-        setIsListening(true);
-        showToast('Microphone active. Speak your answer...', 'info');
-      };
-
-      recognition.onresult = (event) => {
-        let transcript = '';
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          transcript += event.results[i][0].transcript;
-        }
-        if (transcript.trim()) {
-          setAnswer((prev) => (prev ? `${prev} ${transcript.trim()}` : transcript.trim()));
-        }
-      };
-
-      recognition.onerror = (event) => {
-        console.warn('Speech recognition error:', event.error);
-        setIsListening(false);
-      };
-
-      recognition.onend = () => {
-        setIsListening(false);
-      };
-
-      recognitionRef.current = recognition;
-      recognition.start();
-    } catch (err) {
-      console.error('Failed to start speech recognition:', err);
-      setIsListening(false);
-    }
-  };
-
   // Submit Answer handler
   const handleSubmitAnswer = async (e) => {
     e.preventDefault();
 
     if (!answer.trim()) {
-      showToast('Please type or speak your answer before submitting.', 'error');
+      showToast('Please type your answer before submitting.', 'error');
       return;
     }
 
@@ -428,11 +368,6 @@ export default function InterviewEnvironment({ session, questions = [], intervie
       return;
     }
 
-    // Stop recording/speaking if active
-    if (isListening && recognitionRef.current) {
-      recognitionRef.current.stop();
-      setIsListening(false);
-    }
     stopSpeaking();
 
     setSubmitting(true);
@@ -694,7 +629,7 @@ export default function InterviewEnvironment({ session, questions = [], intervie
               <div className="ie-ai-avatar-meta">
                 <strong>AI Technical Interviewer</strong>
                 <span className="ie-ai-speaking-status">
-                  {isSpeaking ? 'Speaking...' : 'Listening for your response'}
+                  {isSpeaking ? 'Speaking...' : 'Ready for your answer'}
                 </span>
               </div>
             </div>
@@ -749,25 +684,13 @@ export default function InterviewEnvironment({ session, questions = [], intervie
               <label htmlFor="answer-input" className="ie-answer-label">
                 Your Technical Answer
               </label>
-
-              <div className="ie-voice-action-wrap">
-                <button
-                  type="button"
-                  className={`ie-voice-btn ${isListening ? 'listening' : ''}`}
-                  onClick={toggleListening}
-                  title={isListening ? 'Stop voice recording' : 'Speak your answer using microphone'}
-                >
-                  <span className="ie-mic-icon">🎙</span>
-                  <span>{isListening ? 'Recording... (Click to Stop)' : 'Voice Input'}</span>
-                </button>
-              </div>
             </div>
 
             <textarea
               id="answer-input"
               className="ie-answer-textarea"
               rows="7"
-              placeholder="Type your explanation or click 'Voice Input' to speak your answer clearly..."
+              placeholder="Type your explanation or technical answer clearly..."
               value={answer}
               onChange={(e) => setAnswer(e.target.value)}
               disabled={submitting}

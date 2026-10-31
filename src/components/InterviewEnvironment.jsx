@@ -9,6 +9,9 @@ export default function InterviewEnvironment({ session, questions = [], intervie
   const candidateName = session?.candidateName || 'Candidate';
   const durationMinutes = Number(session?.duration) || 30;
 
+  // Total questions = main questions from create session API + 1 follow-up for every question
+  const totalQuestionsCount = (questions && questions.length > 0) ? questions.length * 2 : 8;
+
   // Main questions list
   const [mainQuestions] = useState(questions);
   const [currentMainIndex, setCurrentMainIndex] = useState(0);
@@ -317,7 +320,7 @@ export default function InterviewEnvironment({ session, questions = [], intervie
 
           <div className="ie-completed-stats-row">
             <div className="ie-stat-card">
-              <span className="ie-stat-val">{history.length}</span>
+              <span className="ie-stat-val">{history.length} / {totalQuestionsCount}</span>
               <span className="ie-stat-lbl">Questions Answered</span>
             </div>
             <div className="ie-stat-card">
@@ -327,7 +330,9 @@ export default function InterviewEnvironment({ session, questions = [], intervie
               <span className="ie-stat-lbl">Time Spent</span>
             </div>
             <div className="ie-stat-card">
-              <span className="ie-stat-val">100%</span>
+              <span className="ie-stat-val">
+                {Math.round((history.length / (totalQuestionsCount || 1)) * 100)}%
+              </span>
               <span className="ie-stat-lbl">Finished</span>
             </div>
           </div>
@@ -395,6 +400,10 @@ export default function InterviewEnvironment({ session, questions = [], intervie
             )}
             <div className="ie-summary-item">
               <span>Total Questions:</span>
+              <strong>{totalQuestionsCount}</strong>
+            </div>
+            <div className="ie-summary-item">
+              <span>Questions Answered:</span>
               <strong>{history.length}</strong>
             </div>
             <div className="ie-summary-item">
@@ -444,7 +453,7 @@ export default function InterviewEnvironment({ session, questions = [], intervie
           </div>
 
           <div className="ie-progress-pill">
-            <span>Question {history.length + 1}</span>
+            <span>Question {Math.min(history.length + 1, totalQuestionsCount)} of {totalQuestionsCount}</span>
           </div>
 
           {history.length > 0 && (
@@ -505,7 +514,7 @@ export default function InterviewEnvironment({ session, questions = [], intervie
           <div className="ie-question-box">
             <div className="ie-q-meta-row">
               <span className="ie-q-type-badge main">
-                Question {history.length + 1}
+                Question {Math.min(history.length + 1, totalQuestionsCount)} of {totalQuestionsCount}
               </span>
 
               {activeQuestion?.skill && (

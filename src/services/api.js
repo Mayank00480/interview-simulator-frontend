@@ -14,34 +14,42 @@ const api = axios.create({
   },
 });
 
-// Response interceptor to handle global errors and redirect on 401
+// Response interceptor to handle global errors and redirect on 401, 403, or access denied
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     const status = error.response?.status;
-    const responseMessage = error.response?.data?.message;
+    const responseMessage = error.response?.data?.message || error.response?.data?.error;
 
-    // If API returns 401 or "Authentication required", clear session and redirect to login
-    if (status === 401 || responseMessage === 'Authentication required') {
-      localStorage.removeItem('simulator_user');
+      // Check if error is 401, 403, or contains access denied
+      const isAccessDenied =
+        status === 401 ||
+        status === 403 ||
+        responseMessage === 'Authentication required' ||
+        responseMessage === 'Access denied' ||
+        (typeof responseMessage === 'string' &&
+          /access\s*denied|forbidden|unauthorized/i.test(responseMessage));
 
-      // Redirect if not already on the login page
-      if (window.location.pathname !== '/' && window.location.pathname !== '/login') {
-        window.location.href = '/';
+      // Clear session and redirect to login page
+      if (isAccessDenied) {
+        localStorage.removeItem('simulator_user');
+
+        // Redirect if not already on the login page
+        if (window.location.pathname !== '/' && window.location.pathname !== '/login') {
+          window.location.href = '/';
+        }
       }
-    }
 
-    const customError = {
-      status,
-      message:
-        responseMessage ||
-        error.response?.data?.error ||
-        error.message ||
-        'An unexpected error occurred. Please try again.',
-      data: error.response?.data,
-    };
-    return Promise.reject(customError);
-  }
+      const customError = {
+        status,
+        message:
+          responseMessage ||
+          error.message ||
+          'An unexpected error occurred. Please try again.',
+        data: error.response?.data,
+      };
+      return Promise.reject(customError);
+    }
 );
 
 export default api;

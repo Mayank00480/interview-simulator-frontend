@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useLocation, useNavigate, Link } from 'react-router-dom';
-import { getInterviewSessions } from '../services';
+import { getInterviewSessions, getSessionQuestions } from '../services';
 
 export default function InterviewCandidatesPage() {
   const { interviewId } = useParams();
@@ -14,6 +14,39 @@ export default function InterviewCandidatesPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [selectedSession, setSelectedSession] = useState(null);
+  const [sessionQuestions, setSessionQuestions] = useState([]);
+  const [loadingQuestions, setLoadingQuestions] = useState(false);
+  const [questionsError, setQuestionsError] = useState(null);
+
+  const handleSelectSession = async (session) => {
+    setSelectedSession(session);
+    setSessionQuestions([]);
+    setQuestionsError(null);
+    const sid = session._id || session.id;
+    if (sid) {
+      setLoadingQuestions(true);
+      try {
+        const questions = await getSessionQuestions(sid);
+        setSessionQuestions(Array.isArray(questions) ? questions : []);
+      } catch (err) {
+        setQuestionsError(err?.message || 'Failed to load questions for this session.');
+      } finally {
+        setLoadingQuestions(false);
+      }
+    }
+  };
+
+  // Close modal on Escape key
+  useEffect(() => {
+    if (!selectedSession) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setSelectedSession(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedSession]);
 
   useEffect(() => {
     let isMounted = true;
@@ -299,7 +332,7 @@ export default function InterviewCandidatesPage() {
                     <tr
                       key={id}
                       className="interview-table-row clickable-row"
-                      onClick={() => setSelectedSession(session)}
+                      onClick={() => handleSelectSession(session)}
                       title="Click to view full session details"
                     >
                       <td className="cell-role">
@@ -346,7 +379,7 @@ export default function InterviewCandidatesPage() {
                           className="view-eval-btn"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setSelectedSession(session);
+                            handleSelectSession(session);
                           }}
                           title="View Details"
                         >
@@ -362,146 +395,194 @@ export default function InterviewCandidatesPage() {
         </div>
       </div>
 
-      {/* Full Session & Evaluation Details Modal */}
+      {/* Full Session & Evaluation Details Modal (Centered with enhanced UX) */}
       {selectedSession && (
         <div
-          className="jd-modal-overlay"
+          className="jd-modal-backdrop"
           onClick={() => setSelectedSession(null)}
           role="dialog"
           aria-modal="true"
+          aria-labelledby="session-modal-title"
         >
           <div
-            className="jd-modal-card"
-            style={{ maxWidth: '640px' }}
+            className="session-modal-container"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="jd-modal-header">
-              <div>
-                <h3 className="jd-modal-title">
-                  {selectedSession.candidateName || 'Candidate Session'}
-                </h3>
-                <span className="date-text">
-                  {selectedSession.candidateEmail} {selectedSession.candidatePhone && `\u2022 ${selectedSession.candidatePhone}`}
-                </span>
+            {/* Modal Header */}
+            <div className="jd-modal-header" style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '14px', borderBottom: '1px solid #f1f5f9' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
+                <div
+                  style={{
+                    width: '38px',
+                    height: '38px',
+                    borderRadius: '50%',
+                    background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+                    color: '#ffffff',
+                    fontWeight: '700',
+                    fontSize: '13px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                    boxShadow: '0 2px 8px rgba(37, 99, 235, 0.25)',
+                  }}
+                >
+                  {(selectedSession.candidateName || 'C')
+                    .split(' ')
+                    .map((n) => n[0])
+                    .join('')
+                    .toUpperCase()
+                    .slice(0, 2)}
+                </div>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    <h3 id="session-modal-title" className="jd-modal-title" style={{ fontSize: '15px' }}>
+                      {selectedSession.candidateName || 'Candidate Session'}
+                    </h3>
+                    <span className={`status-badge ${(selectedSession.status || 'pending').toLowerCase()}`}>
+                      <span className="status-dot" />
+                      {selectedSession.status || 'PENDING'}
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '10.5px', color: '#64748b', marginTop: '2px', flexWrap: 'wrap' }}>
+                    <span>✉ {selectedSession.candidateEmail || 'No email'}</span>
+                    {selectedSession.candidatePhone && (
+                      <span>☎ {selectedSession.candidatePhone}</span>
+                    )}
+                  </div>
+                </div>
               </div>
+
               <button
                 type="button"
-                className="jd-close-btn"
+                className="jd-modal-close-btn"
                 onClick={() => setSelectedSession(null)}
-                aria-label="Close"
+                aria-label="Close modal"
               >
-                &times;
+                ✕
               </button>
             </div>
 
-            <div className="jd-modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '14px', maxHeight: '75vh', overflowY: 'auto' }}>
-              {/* Score & Status Highlight */}
+            {/* Modal Body */}
+            <div className="jd-modal-body" style={{ padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: '16px', maxHeight: '72vh', overflowY: 'auto' }}>
+              {/* Executive Overview: Score & Metadata Banner */}
               <div
                 style={{
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   padding: '12px 16px',
-                  borderRadius: '10px',
-                  background: '#f8fafc',
-                  border: '1px solid #e2e8f0',
+                  borderRadius: '12px',
+                  background: 'linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%)',
+                  border: '1px solid #dbeafe',
+                  gap: '14px',
                   flexWrap: 'wrap',
-                  gap: '10px',
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <div
                     style={{
-                      width: '46px',
-                      height: '46px',
+                      width: '48px',
+                      height: '48px',
                       borderRadius: '50%',
                       display: 'flex',
                       flexDirection: 'column',
                       alignItems: 'center',
                       justifyContent: 'center',
                       background: '#ffffff',
-                      border: '2.5px solid #2563eb',
-                      color: '#2563eb',
+                      border: `2.5px solid ${
+                        selectedSession.overallScore >= 70
+                          ? '#10b981'
+                          : selectedSession.overallScore >= 40
+                            ? '#f59e0b'
+                            : '#ef4444'
+                      }`,
+                      color:
+                        selectedSession.overallScore >= 70
+                          ? '#047857'
+                          : selectedSession.overallScore >= 40
+                            ? '#b45309'
+                            : '#b91c1c',
                       fontWeight: '800',
+                      flexShrink: 0,
                     }}
                   >
-                    <span style={{ fontSize: '15px', lineHeight: 1 }}>
+                    <span style={{ fontSize: '16px', lineHeight: 1 }}>
                       {selectedSession.overallScore ?? '—'}
                     </span>
-                    <span style={{ fontSize: '8px', color: '#64748b' }}>/100</span>
+                    <span style={{ fontSize: '8px', color: '#94a3b8' }}>/100</span>
                   </div>
                   <div>
-                    <h4 style={{ margin: '0 0 2px 0', fontSize: '12.5px', color: '#0f172a' }}>
-                      Overall AI Assessment Score
+                    <h4 style={{ margin: '0 0 2px 0', fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>
+                      Overall Performance Score
                     </h4>
                     <span style={{ fontSize: '10.5px', color: '#64748b' }}>
-                      Duration: {selectedSession.duration ? `${selectedSession.duration} mins` : '30 mins'}
+                      Duration: ⏱ {selectedSession.duration ? `${selectedSession.duration} mins` : '30 mins'}
                     </span>
                   </div>
                 </div>
 
-                <span className={`status-badge ${(selectedSession.status || 'pending').toLowerCase()}`}>
-                  <span className="status-dot" />
-                  {selectedSession.status || 'PENDING'}
-                </span>
+                {/* Timestamps */}
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', fontSize: '10.5px', color: '#475569' }}>
+                  {selectedSession.startedAt && (
+                    <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '4px 8px' }}>
+                      <span style={{ color: '#94a3b8' }}>Started: </span>
+                      <strong>{formatDate(selectedSession.startedAt)}</strong>
+                    </div>
+                  )}
+                  {selectedSession.completedAt && (
+                    <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '4px 8px' }}>
+                      <span style={{ color: '#94a3b8' }}>Completed: </span>
+                      <strong>{formatDate(selectedSession.completedAt)}</strong>
+                    </div>
+                  )}
+                </div>
               </div>
 
-              {/* Timing info */}
-              <div
-                style={{
-                  display: 'flex',
-                  gap: '16px',
-                  fontSize: '10.5px',
-                  color: '#64748b',
-                  background: '#ffffff',
-                  padding: '8px 12px',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '8px',
-                }}
-              >
-                {selectedSession.startedAt && (
-                  <div>
-                    <strong>Started:</strong> {formatDate(selectedSession.startedAt)}
-                  </div>
-                )}
-                {selectedSession.completedAt && (
-                  <div>
-                    <strong>Completed:</strong> {formatDate(selectedSession.completedAt)}
-                  </div>
-                )}
-              </div>
-
-              {/* Skill Scores */}
+              {/* Skill Scores Section */}
               {selectedSession.skillScores?.length > 0 && (
                 <div>
-                  <h4 style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.4px', color: '#475569', marginBottom: '8px' }}>
-                    Skill Scores
+                  <h4 style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px', color: '#475569', fontWeight: '700', margin: '0 0 8px 0' }}>
+                    Skill Competency Scores
                   </h4>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '8px' }}>
-                    {selectedSession.skillScores.map((sk, i) => (
-                      <div
-                        key={i}
-                        style={{
-                          background: '#f0fdf4',
-                          border: '1px solid #bbf7d0',
-                          borderRadius: '8px',
-                          padding: '8px 12px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                        }}
-                      >
-                        <span style={{ fontSize: '11px', fontWeight: '600', color: '#166534' }}>{sk.skill}</span>
-                        <strong style={{ fontSize: '12px', color: '#15803d' }}>{sk.score}</strong>
-                      </div>
-                    ))}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '8px' }}>
+                    {selectedSession.skillScores.map((sk, i) => {
+                      const scoreVal = typeof sk.score === 'number' ? sk.score : 0;
+                      return (
+                        <div
+                          key={i}
+                          style={{
+                            background: '#ffffff',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: '8px',
+                            padding: '8px 12px',
+                            boxShadow: '0 1px 2px rgba(0,0,0,0.02)',
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+                            <span style={{ fontSize: '11px', fontWeight: '600', color: '#1e293b' }}>{sk.skill}</span>
+                            <span style={{ fontSize: '11.5px', fontWeight: '700', color: '#2563eb' }}>{sk.score}</span>
+                          </div>
+                          <div style={{ width: '100%', height: '4px', background: '#e2e8f0', borderRadius: '4px', overflow: 'hidden' }}>
+                            <div
+                              style={{
+                                width: `${Math.min(100, (scoreVal / 10) * 100)}%`,
+                                height: '100%',
+                                background: scoreVal >= 7 ? '#10b981' : scoreVal >= 4 ? '#3b82f6' : '#f59e0b',
+                                borderRadius: '4px',
+                              }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               )}
 
-              {/* AI Evaluation */}
+              {/* AI Evaluation Feedback */}
               <div>
-                <h4 style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.4px', color: '#475569', marginBottom: '8px' }}>
+                <h4 style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px', color: '#475569', fontWeight: '700', margin: '0 0 8px 0' }}>
                   AI Evaluation Feedback
                 </h4>
                 <div
@@ -510,18 +591,140 @@ export default function InterviewCandidatesPage() {
                     border: '1px solid #e2e8f0',
                     borderLeft: '3px solid #2563eb',
                     borderRadius: '8px',
-                    padding: '14px',
+                    padding: '12px 14px',
                     fontSize: '11.5px',
                     lineHeight: '1.6',
                     color: '#334155',
                   }}
                 >
-                  {selectedSession.evaluation || 'No evaluation text available for this session.'}
+                  {selectedSession.evaluation || 'No evaluation notes recorded for this session.'}
                 </div>
+              </div>
+
+              {/* Questions & Candidate Answers (Loaded via GET /sessions/:sessionId/questions) */}
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <h4 style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px', color: '#475569', fontWeight: '700', margin: 0 }}>
+                    Interview Questions &amp; Answers
+                  </h4>
+                  {!loadingQuestions && sessionQuestions.length > 0 && (
+                    <span style={{ fontSize: '10px', color: '#64748b', fontWeight: '600', background: '#f1f5f9', padding: '1px 6px', borderRadius: '8px' }}>
+                      {sessionQuestions.length} Questions
+                    </span>
+                  )}
+                </div>
+
+                {loadingQuestions ? (
+                  <div style={{ padding: '20px', textAlign: 'center', color: '#64748b', fontSize: '11px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                    <div style={{ display: 'inline-block', width: '16px', height: '16px', border: '2px solid #cbd5e1', borderTopColor: '#2563eb', borderRadius: '50%', animation: 'spin 0.8s linear infinite', marginRight: '8px', verticalAlign: 'middle' }} />
+                    Loading questions &amp; candidate answers...
+                  </div>
+                ) : questionsError ? (
+                  <div style={{ padding: '10px 14px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', color: '#b91c1c', fontSize: '11px' }}>
+                    {questionsError}
+                  </div>
+                ) : sessionQuestions.length === 0 ? (
+                  <div style={{ padding: '14px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', color: '#64748b', fontSize: '11px', textAlign: 'center' }}>
+                    No questions recorded for this session.
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {sessionQuestions.map((q, idx) => (
+                      <div
+                        key={q._id || idx}
+                        style={{
+                          background: '#ffffff',
+                          border: '1px solid #e2e8f0',
+                          borderRadius: '8px',
+                          padding: '12px',
+                          boxShadow: '0 1px 2px rgba(0,0,0,0.02)',
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px', flexWrap: 'wrap' }}>
+                          <span
+                            style={{
+                              fontSize: '9.5px',
+                              fontWeight: '700',
+                              background: '#e2e8f0',
+                              color: '#334155',
+                              padding: '1px 6px',
+                              borderRadius: '4px',
+                            }}
+                          >
+                            Q{q.order || idx + 1}
+                          </span>
+                          {q.skill && (
+                            <span
+                              style={{
+                                fontSize: '9px',
+                                fontWeight: '600',
+                                background: '#eff6ff',
+                                color: '#1d4ed8',
+                                border: '1px solid #bfdbfe',
+                                padding: '1px 6px',
+                                borderRadius: '4px',
+                              }}
+                            >
+                              {q.skill}
+                            </span>
+                          )}
+                          {q.isFollowUp && (
+                            <span
+                              style={{
+                                fontSize: '9px',
+                                fontWeight: '600',
+                                background: '#fffbeb',
+                                color: '#b45309',
+                                border: '1px solid #fde68a',
+                                padding: '1px 6px',
+                                borderRadius: '4px',
+                              }}
+                            >
+                              Follow-Up
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Question Text */}
+                        <p style={{ margin: '0 0 8px 0', fontSize: '11.5px', fontWeight: '600', color: '#0f172a', lineHeight: '1.45' }}>
+                          {q.questionText}
+                        </p>
+
+                        {/* Candidate Answer */}
+                        <div
+                          style={{
+                            background: q.answer ? '#f8fafc' : '#fafafa',
+                            border: `1px solid ${q.answer ? '#e2e8f0' : '#f1f5f9'}`,
+                            borderLeft: q.answer ? '3px solid #10b981' : '3px solid #cbd5e1',
+                            borderRadius: '6px',
+                            padding: '8px 10px',
+                          }}
+                        >
+                          <span style={{ fontSize: '9px', fontWeight: '700', textTransform: 'uppercase', color: '#64748b', display: 'block', marginBottom: '2px' }}>
+                            Candidate Answer:
+                          </span>
+                          {q.answer ? (
+                            <p style={{ margin: 0, fontSize: '11px', color: '#1e293b', lineHeight: '1.5' }}>
+                              {q.answer}
+                            </p>
+                          ) : (
+                            <span style={{ fontSize: '10.5px', color: '#94a3b8', fontStyle: 'italic' }}>
+                              No answer recorded (unanswered / skipped)
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
-            <div className="jd-modal-footer">
+            {/* Modal Footer */}
+            <div className="jd-modal-footer" style={{ padding: '10px 20px', borderTop: '1px solid #f1f5f9', background: '#fbfcfe', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '10px', color: '#94a3b8' }}>
+                Session ID: {selectedSession._id}
+              </span>
               <button
                 type="button"
                 className="jd-modal-close-action"

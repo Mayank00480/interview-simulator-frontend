@@ -55,3 +55,69 @@ export async function getInterviewSessions(interviewId) {
     throw new Error(message);
   }
 }
+
+/**
+ * Generate questions for an interview
+ * Endpoint: POST http://localhost:3000/api/interviews/:id/generate-questions
+ */
+export async function generateQuestions(interviewId) {
+  try {
+    const response = await api.post(`/interviews/${interviewId}/generate-questions`);
+    return response.data;
+  } catch (error) {
+    console.error('Generate questions API error:', error);
+    const message =
+      error.response?.data?.message ||
+      error.response?.data?.error ||
+      error.message ||
+      'Failed to generate questions.';
+    throw new Error(message);
+  }
+}
+
+/**
+ * Publish an interview
+ * Endpoint: PATCH/PUT/POST http://localhost:3000/api/interviews/:id/publish
+ */
+export async function publishInterview(interviewId) {
+  try {
+    const response = await api.patch(`/interviews/${interviewId}/publish`);
+    return response.data;
+  } catch (error) {
+    if (error.response?.status === 404 || error.response?.status === 405) {
+      try {
+        const responsePut = await api.put(`/interviews/${interviewId}/publish`);
+        return responsePut.data;
+      } catch (putErr) {
+        if (putErr.response?.status === 404 || putErr.response?.status === 405) {
+          const responsePost = await api.post(`/interviews/${interviewId}/publish`);
+          return responsePost.data;
+        }
+        throw putErr;
+      }
+    }
+    console.error('Publish interview API error:', error);
+    const message =
+      error.response?.data?.message ||
+      error.response?.data?.error ||
+      error.message ||
+      'Failed to publish interview.';
+    throw new Error(message);
+  }
+}
+
+export async function getSessionQuestions(sessionId) {
+  try {
+    const response = await api.get(`/sessions/${sessionId}/questions`);
+    return response.data?.questions || [];
+  } catch (error) {
+    console.error('Get session questions error:', error);
+    const message =
+      error.response?.data?.message ||
+      error.response?.data?.error ||
+      error.message ||
+      'Failed to fetch questions for this session.';
+    throw new Error(message);
+  }
+}
+

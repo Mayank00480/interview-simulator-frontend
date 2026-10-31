@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
-export default function CreateInterviewForm({ onSubmit, loading = false }) {
-  const [skills, setSkills] = useState(['React', 'Node.js', 'MongoDB']);
+export default function CreateInterviewForm({ onSubmit, loading = false, initialData = null }) {
+  const [skills, setSkills] = useState(initialData?.skills || ['React', 'Node.js', 'MongoDB']);
   const [newSkill, setNewSkill] = useState('');
   const [formData, setFormData] = useState({
-    jobRole: '',
-    experienceLevel: '',
-    jobDescription: '',
-    duration: 30,
-    questionCount: 4,
-    questionsCount: 4,
-    expiresAt: '',
+    jobRole: initialData?.jobRole || '',
+    experienceLevel: initialData?.experienceLevel || '',
+    jobDescription: initialData?.jobDescription || '',
+    duration: initialData?.duration || 30,
+    questionCount: initialData?.questionCount || 4,
+    questionsCount: initialData?.questionCount || initialData?.questionsCount || 4,
+    expiresAt: initialData?.expiresAt ? initialData.expiresAt.slice(0, 10) : '',
   });
 
   const handleAddSkill = (e) => {

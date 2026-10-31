@@ -114,7 +114,6 @@ export default function CreateInterviewPage() {
           ) : (
             <GenerateQuestionsPanel
               interview={createdInterview}
-              onSwitchToCreate={() => setActiveTab('create')}
             />
           )}
         </div>

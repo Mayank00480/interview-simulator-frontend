@@ -30,8 +30,15 @@ export default function InterviewEnvironment({ session, questions = [], intervie
   const [completedSessionData, setCompletedSessionData] = useState(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
-  // Completed history
-  const [history, setHistory] = useState([]);
+  // Completed history: restored from sessionStorage if available
+  const [history, setHistory] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem(`candidate_history_${sessionId}`);
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
 
   // Audio / Speech State
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -77,6 +84,15 @@ export default function InterviewEnvironment({ session, questions = [], intervie
       const sessionData = response?.session || response?.data || response;
       setCompletedSessionData(sessionData);
       setIsCompleted(true);
+      if (sessionId) {
+        try {
+          sessionStorage.removeItem(`candidate_history_${sessionId}`);
+          sessionStorage.removeItem(`candidate_session_${session?.interviewId || ''}_${sessionId}`);
+          sessionStorage.removeItem(`candidate_session_${session?.interviewId || ''}`);
+        } catch {
+          // ignore
+        }
+      }
       showToast(response?.message || 'Session completed successfully!', 'success');
     } catch (err) {
       console.error('Complete interview error:', err);
@@ -109,7 +125,7 @@ export default function InterviewEnvironment({ session, questions = [], intervie
       <div className="ie-modal-backdrop" onClick={() => !completing && setShowConfirmModal(false)}>
         <div className="ie-modal-card" onClick={(e) => e.stopPropagation()}>
           <div className="ie-modal-icon-wrap">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#eab308" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#eab308" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10" />
               <line x1="12" y1="8" x2="12" y2="12" />
               <line x1="12" y1="16" x2="12.01" y2="16" />
@@ -270,7 +286,17 @@ export default function InterviewEnvironment({ session, questions = [], intervie
         answer: answer.trim(),
         isFollowUp: Boolean(activeQuestion.isFollowUp),
       };
-      setHistory((prev) => [...prev, answeredItem]);
+      setHistory((prev) => {
+        const nextHist = [...prev, answeredItem];
+        if (sessionId) {
+          try {
+            sessionStorage.setItem(`candidate_history_${sessionId}`, JSON.stringify(nextHist));
+          } catch {
+            // ignore
+          }
+        }
+        return nextHist;
+      });
 
       // Check for follow-up question
       if (!activeQuestion.isFollowUp && result?.followUp && result.followUp.questionText) {
@@ -554,7 +580,7 @@ export default function InterviewEnvironment({ session, questions = [], intervie
             <textarea
               id="answer-input"
               className="ie-answer-textarea"
-              rows="6"
+              rows="7"
               placeholder="Type your explanation or click 'Voice Input' to speak your answer clearly..."
               value={answer}
               onChange={(e) => setAnswer(e.target.value)}

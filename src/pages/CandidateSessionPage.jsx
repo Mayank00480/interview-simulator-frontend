@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { createCandidateSession } from '../services';
 import { useToast } from '../context/ToastContext';
 import InterviewEnvironment from '../components/InterviewEnvironment';
 
 export default function CandidateSessionPage() {
-  const { interviewId } = useParams();
+  const { interviewId, sessionId } = useParams();
+  const navigate = useNavigate();
   const { showToast } = useToast();
 
   // Form fields
@@ -18,6 +19,33 @@ export default function CandidateSessionPage() {
   // Active Session & Questions State
   const [activeSession, setActiveSession] = useState(null);
   const [sessionQuestions, setSessionQuestions] = useState([]);
+
+  // Restore session data from sessionStorage on mount or refresh
+  useEffect(() => {
+    try {
+      let cached = null;
+      if (interviewId && sessionId) {
+        const raw = sessionStorage.getItem(`candidate_session_${interviewId}_${sessionId}`);
+        if (raw) cached = JSON.parse(raw);
+      }
+      if (!cached && interviewId) {
+        const rawLast = sessionStorage.getItem(`candidate_session_${interviewId}`);
+        if (rawLast) cached = JSON.parse(rawLast);
+      }
+
+      if (cached && cached.session && Array.isArray(cached.questions) && cached.questions.length > 0) {
+        setActiveSession(cached.session);
+        setSessionQuestions(cached.questions);
+
+        const sid = cached.session._id || cached.session.id;
+        if (sid && !sessionId) {
+          navigate(`/candidate-session/${interviewId}/${sid}`, { replace: true });
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to restore candidate session from sessionStorage:', err);
+    }
+  }, [interviewId, sessionId, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -38,9 +66,29 @@ export default function CandidateSessionPage() {
       const result = await createCandidateSession(interviewId, payload);
       const sessionData = result?.session || result?.data || result;
       const questionsList = Array.isArray(result?.questions) ? result.questions : [];
+      const sid = sessionData?._id || sessionData?.id;
+
+      // Store in sessionStorage so when user refresh, context won't be lost
+      const cachePayload = {
+        session: sessionData,
+        questions: questionsList,
+        interviewId,
+        sessionId: sid,
+      };
+      if (interviewId && sid) {
+        sessionStorage.setItem(`candidate_session_${interviewId}_${sid}`, JSON.stringify(cachePayload));
+      }
+      if (interviewId) {
+        sessionStorage.setItem(`candidate_session_${interviewId}`, JSON.stringify(cachePayload));
+      }
 
       setActiveSession(sessionData);
       setSessionQuestions(questionsList);
+
+      // Open page on /candidate-session/{interviewId}/{sessionId}
+      if (sid) {
+        navigate(`/candidate-session/${interviewId}/${sid}`, { replace: true });
+      }
 
       showToast(result?.message || 'Session started successfully!', 'success');
     } catch (err) {
@@ -55,16 +103,25 @@ export default function CandidateSessionPage() {
     }
   };
 
+  const handleExit = () => {
+    if (interviewId && sessionId) {
+      sessionStorage.removeItem(`candidate_session_${interviewId}_${sessionId}`);
+    }
+    if (interviewId) {
+      sessionStorage.removeItem(`candidate_session_${interviewId}`);
+    }
+    setActiveSession(null);
+    setSessionQuestions([]);
+    navigate(`/candidate-session/${interviewId}`, { replace: true });
+  };
+
   // If session is active and has questions, transition into Interview Environment
   if (activeSession && sessionQuestions.length > 0) {
     return (
       <InterviewEnvironment
         session={activeSession}
         questions={sessionQuestions}
-        onExit={() => {
-          setActiveSession(null);
-          setSessionQuestions([]);
-        }}
+        onExit={handleExit}
       />
     );
   }

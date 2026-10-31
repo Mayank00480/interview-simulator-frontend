@@ -3,7 +3,7 @@ import { generateQuestions, publishInterview } from '../services';
 import { useToast } from '../context/ToastContext';
 import { useNavigate, Link } from 'react-router-dom';
 
-export default function GenerateQuestionsPanel({ interview, onSwitchToCreate }) {
+export default function GenerateQuestionsPanel({ interview }) {
   const [questions, setQuestions] = useState(interview?.questions || []);
   const [generating, setGenerating] = useState(false);
   const [publishing, setPublishing] = useState(false);
@@ -76,21 +76,14 @@ export default function GenerateQuestionsPanel({ interview, onSwitchToCreate }) 
         <Link to="/interviews" className="back-link">
           ← Back to Interviews
         </Link>
-        {onSwitchToCreate && (
-          <button type="button" className="gqp-back-to-edit" onClick={onSwitchToCreate}>
-            ✎ Edit Interview Details
-          </button>
-        )}
       </div>
 
       {/* Header */}
       <div className="create-header">
         <div className="gqp-header-title-row">
           <h2>Generate Questions</h2>
-          {isPublished ? (
+          {isPublished && (
             <span className="gqp-status-badge published">✓ Published</span>
-          ) : (
-            <span className="gqp-status-badge draft">Draft Mode</span>
           )}
         </div>
         <p>AI will generate tailored technical interview questions based on your role and skills.</p>
@@ -205,27 +198,6 @@ export default function GenerateQuestionsPanel({ interview, onSwitchToCreate }) 
               <span className="gqp-count-pill">{questions.length} Questions</span>
               <span className="gqp-qh-subtitle">Generated technical questions</span>
             </div>
-            <button
-              type="button"
-              className="gqp-btn-secondary"
-              onClick={handleGenerate}
-              disabled={generating || publishing}
-            >
-              {generating ? (
-                <>
-                  <span className="btn-spinner btn-spinner--sm" />
-                  <span>Regenerating...</span>
-                </>
-              ) : (
-                <>
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="23 4 23 10 17 10" />
-                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
-                  </svg>
-                  <span>Regenerate</span>
-                </>
-              )}
-            </button>
           </div>
 
           <div className="gqp-questions-container">

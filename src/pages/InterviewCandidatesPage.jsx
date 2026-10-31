@@ -17,17 +17,31 @@ export default function InterviewCandidatesPage() {
   const [sessionQuestions, setSessionQuestions] = useState([]);
   const [loadingQuestions, setLoadingQuestions] = useState(false);
   const [questionsError, setQuestionsError] = useState(null);
+  const [expandedQuestions, setExpandedQuestions] = useState({});
+
+  const toggleQuestionAccordion = (key) => {
+    setExpandedQuestions((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
+  };
 
   const handleSelectSession = async (session) => {
     setSelectedSession(session);
     setSessionQuestions([]);
     setQuestionsError(null);
+    setExpandedQuestions({});
     const sid = session._id || session.id;
     if (sid) {
       setLoadingQuestions(true);
       try {
         const questions = await getSessionQuestions(sid);
-        setSessionQuestions(Array.isArray(questions) ? questions : []);
+        const list = Array.isArray(questions) ? questions : [];
+        setSessionQuestions(list);
+        if (list.length > 0) {
+          const firstKey = list[0]._id || 'q_0';
+          setExpandedQuestions({ [firstKey]: true });
+        }
       } catch (err) {
         setQuestionsError(err?.message || 'Failed to load questions for this session.');
       } finally {
@@ -628,103 +642,192 @@ export default function InterviewCandidatesPage() {
                     No questions recorded for this session.
                   </div>
                 ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    {sessionQuestions.map((q, idx) => (
-                      <div
-                        key={q._id || idx}
-                        style={{
-                          background: '#ffffff',
-                          border: '1px solid #e2e8f0',
-                          borderRadius: '8px',
-                          padding: '12px',
-                          boxShadow: '0 1px 2px rgba(0,0,0,0.02)',
-                        }}
-                      >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px', flexWrap: 'wrap' }}>
-                          <span
-                            style={{
-                              fontSize: '9.5px',
-                              fontWeight: '700',
-                              background: '#e2e8f0',
-                              color: '#334155',
-                              padding: '1px 6px',
-                              borderRadius: '4px',
-                            }}
-                          >
-                            Q{q.order || idx + 1}
-                          </span>
-                          {q.skill && (
-                            <span
-                              style={{
-                                fontSize: '9px',
-                                fontWeight: '600',
-                                background: '#eff6ff',
-                                color: '#1d4ed8',
-                                border: '1px solid #bfdbfe',
-                                padding: '1px 6px',
-                                borderRadius: '4px',
-                              }}
-                            >
-                              {q.skill}
-                            </span>
-                          )}
-                          {q.isFollowUp && (
-                            <span
-                              style={{
-                                fontSize: '9px',
-                                fontWeight: '600',
-                                background: '#fffbeb',
-                                color: '#b45309',
-                                border: '1px solid #fde68a',
-                                padding: '1px 6px',
-                                borderRadius: '4px',
-                              }}
-                            >
-                              Follow-Up
-                            </span>
-                          )}
-                        </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {sessionQuestions.map((q, idx) => {
+                      const qKey = q._id || `q_${idx}`;
+                      const isExpanded = Boolean(expandedQuestions[qKey]);
+                      const hasAnswer = Boolean(q.answer && q.answer.trim());
 
-                        {/* Question Text */}
-                        <p style={{ margin: '0 0 8px 0', fontSize: '11.5px', fontWeight: '600', color: '#0f172a', lineHeight: '1.45' }}>
-                          {q.questionText}
-                        </p>
-
-                        {/* Candidate Answer */}
+                      return (
                         <div
+                          key={qKey}
                           style={{
-                            background: q.answer ? '#f8fafc' : '#fafafa',
-                            border: `1px solid ${q.answer ? '#e2e8f0' : '#f1f5f9'}`,
-                            borderLeft: q.answer ? '3px solid #10b981' : '3px solid #cbd5e1',
-                            borderRadius: '6px',
-                            padding: '8px 10px',
+                            background: '#ffffff',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: '8px',
+                            overflow: 'hidden',
+                            boxShadow: '0 1px 2px rgba(0,0,0,0.02)',
+                            transition: 'border-color 0.15s ease',
                           }}
                         >
-                          <span style={{ fontSize: '9px', fontWeight: '700', textTransform: 'uppercase', color: '#64748b', display: 'block', marginBottom: '2px' }}>
-                            Candidate Answer:
-                          </span>
-                          {q.answer ? (
-                            <p style={{ margin: 0, fontSize: '11px', color: '#1e293b', lineHeight: '1.5' }}>
-                              {q.answer}
-                            </p>
-                          ) : (
-                            <span style={{ fontSize: '10.5px', color: '#94a3b8', fontStyle: 'italic' }}>
-                              No answer recorded (unanswered / skipped)
-                            </span>
+                          {/* Accordion Header */}
+                          <div
+                            onClick={() => toggleQuestionAccordion(qKey)}
+                            role="button"
+                            tabIndex={0}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              padding: '10px 12px',
+                              background: isExpanded ? '#f8fafc' : '#ffffff',
+                              cursor: 'pointer',
+                              userSelect: 'none',
+                              gap: '8px',
+                            }}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, minWidth: 0, flexWrap: 'wrap' }}>
+                              <span
+                                style={{
+                                  fontSize: '9.5px',
+                                  fontWeight: '700',
+                                  background: '#e2e8f0',
+                                  color: '#334155',
+                                  padding: '1.5px 6px',
+                                  borderRadius: '4px',
+                                  flexShrink: 0,
+                                }}
+                              >
+                                Q{q.order || idx + 1}
+                              </span>
+                              {q.skill && (
+                                <span
+                                  style={{
+                                    fontSize: '9px',
+                                    fontWeight: '600',
+                                    background: '#eff6ff',
+                                    color: '#1d4ed8',
+                                    border: '1px solid #bfdbfe',
+                                    padding: '1px 6px',
+                                    borderRadius: '4px',
+                                    flexShrink: 0,
+                                  }}
+                                >
+                                  {q.skill}
+                                </span>
+                              )}
+                              {q.isFollowUp && (
+                                <span
+                                  style={{
+                                    fontSize: '9px',
+                                    fontWeight: '600',
+                                    background: '#fffbeb',
+                                    color: '#b45309',
+                                    border: '1px solid #fde68a',
+                                    padding: '1px 6px',
+                                    borderRadius: '4px',
+                                    flexShrink: 0,
+                                  }}
+                                >
+                                  Follow-Up
+                                </span>
+                              )}
+                              <span
+                                style={{
+                                  fontSize: '11px',
+                                  fontWeight: '600',
+                                  color: '#0f172a',
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis',
+                                  whiteSpace: isExpanded ? 'normal' : 'nowrap',
+                                  flex: 1,
+                                }}
+                              >
+                                {q.questionText}
+                              </span>
+                            </div>
+
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                              {hasAnswer ? (
+                                <span
+                                  style={{
+                                    fontSize: '9px',
+                                    fontWeight: '600',
+                                    background: '#f0fdf4',
+                                    color: '#16a34a',
+                                    border: '1px solid #bbf7d0',
+                                    padding: '1px 6px',
+                                    borderRadius: '4px',
+                                  }}
+                                >
+                                  ✓ Answered
+                                </span>
+                              ) : (
+                                <span
+                                  style={{
+                                    fontSize: '9px',
+                                    fontWeight: '600',
+                                    background: '#f8fafc',
+                                    color: '#94a3b8',
+                                    border: '1px solid #e2e8f0',
+                                    padding: '1px 6px',
+                                    borderRadius: '4px',
+                                  }}
+                                >
+                                  Unanswered
+                                </span>
+                              )}
+                              <span
+                                style={{
+                                  fontSize: '11px',
+                                  color: '#64748b',
+                                  transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                                  transition: 'transform 0.2s ease',
+                                  display: 'inline-block',
+                                }}
+                              >
+                                ▾
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Accordion Body */}
+                          {isExpanded && (
+                            <div
+                              style={{
+                                padding: '10px 12px',
+                                borderTop: '1px solid #e2e8f0',
+                                background: '#fafcff',
+                              }}
+                            >
+                              <p style={{ margin: '0 0 8px 0', fontSize: '11.5px', fontWeight: '500', color: '#334155', lineHeight: '1.45' }}>
+                                <strong>Full Question:</strong> {q.questionText}
+                              </p>
+
+                              <div
+                                style={{
+                                  background: hasAnswer ? '#ffffff' : '#f8fafc',
+                                  border: `1px solid ${hasAnswer ? '#d1fae5' : '#e2e8f0'}`,
+                                  borderLeft: hasAnswer ? '3px solid #10b981' : '3px solid #cbd5e1',
+                                  borderRadius: '6px',
+                                  padding: '8px 10px',
+                                }}
+                              >
+                                <span style={{ fontSize: '9px', fontWeight: '700', textTransform: 'uppercase', color: '#64748b', display: 'block', marginBottom: '2px' }}>
+                                  Candidate Answer:
+                                </span>
+                                {hasAnswer ? (
+                                  <p style={{ margin: 0, fontSize: '11px', color: '#1e293b', lineHeight: '1.5' }}>
+                                    {q.answer}
+                                  </p>
+                                ) : (
+                                  <span style={{ fontSize: '10.5px', color: '#94a3b8', fontStyle: 'italic' }}>
+                                    No answer recorded (unanswered / skipped)
+                                  </span>
+                                )}
+                              </div>
+                            </div>
                           )}
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>
             </div>
 
             {/* Modal Footer */}
-            <div className="jd-modal-footer" style={{ padding: '10px 20px', borderTop: '1px solid #f1f5f9', background: '#fbfcfe', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: '10px', color: '#94a3b8' }}>
-                Session ID: {selectedSession._id}
-              </span>
+            <div className="jd-modal-footer" style={{ padding: '10px 20px', borderTop: '1px solid #f1f5f9', background: '#fbfcfe', display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
               <button
                 type="button"
                 className="jd-modal-close-action"

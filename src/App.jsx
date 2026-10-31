@@ -20,7 +20,9 @@ function App() {
 
           {/* Public Candidate Session Routes (No recruiter authentication required) */}
           <Route path="/candidate-session/:interviewId" element={<CandidateSessionPage />} />
+          <Route path="/candidate-session/:interviewId/:sessionId" element={<CandidateSessionPage />} />
           <Route path="/interview-session/:interviewId" element={<CandidateSessionPage />} />
+          <Route path="/interview-session/:interviewId/:sessionId" element={<CandidateSessionPage />} />
 
           {/* Protected App Routes inside AppLayout */}
           <Route

@@ -6833,3 +6833,379 @@ input[type="date"].form-input::-webkit-calendar-picker-indicator {
     min-height: 60px !important;
   }
 }
+
+
+/* ==========================================================================
+   Compact Confirmation Modal for Complete Interview
+   ========================================================================== */
+
+.ie-modal-card {
+  max-width: 320px !important;
+  padding: 16px 18px !important;
+  border-radius: 12px !important;
+  box-shadow: 0 12px 30px -8px rgba(0, 0, 0, 0.22), 0 0 0 1px rgba(0, 0, 0, 0.06) !important;
+}
+
+.ie-modal-icon-wrap {
+  width: 34px !important;
+  height: 34px !important;
+  margin-bottom: 8px !important;
+}
+
+.ie-modal-icon-wrap svg {
+  width: 18px !important;
+  height: 18px !important;
+}
+
+.ie-modal-title {
+  font-size: 14px !important;
+  margin: 0 0 4px !important;
+  font-weight: 700 !important;
+}
+
+.ie-modal-desc {
+  font-size: 11px !important;
+  margin: 0 0 14px !important;
+  line-height: 1.4 !important;
+  color: #64748b !important;
+}
+
+.ie-modal-actions {
+  gap: 8px !important;
+}
+
+.ie-modal-btn {
+  padding: 6px 12px !important;
+  font-size: 11.5px !important;
+  border-radius: 6px !important;
+  font-weight: 600 !important;
+}
+
+
+/* ==========================================================================
+   Ultra-Compact & Sleek Interview Environment (.interview-env-*)
+   ========================================================================== */
+
+/* Top bar: compact 44px */
+.ie-top-bar {
+  height: 44px !important;
+  padding: 0 16px !important;
+}
+
+.ie-top-left {
+  gap: 8px !important;
+}
+
+.ie-brand-badge {
+  font-size: 11.5px !important;
+  gap: 6px !important;
+}
+
+.ie-brand-pulse {
+  width: 6px !important;
+  height: 6px !important;
+}
+
+.ie-candidate-chip,
+.ie-role-chip {
+  padding: 2px 7px !important;
+  font-size: 10px !important;
+  border-radius: 12px !important;
+}
+
+.ie-top-right {
+  gap: 8px !important;
+}
+
+.ie-timer-badge {
+  padding: 2.5px 8px !important;
+  font-size: 11px !important;
+  border-radius: 12px !important;
+  gap: 4px !important;
+}
+
+.ie-progress-pill {
+  padding: 2.5px 8px !important;
+  font-size: 10px !important;
+  border-radius: 12px !important;
+}
+
+.ie-top-complete-btn {
+  padding: 3px 9px !important;
+  font-size: 10.5px !important;
+  border-radius: 6px !important;
+}
+
+/* Stage container: tighter padding and gaps */
+.ie-stage-container {
+  max-width: 900px !important;
+  padding: 10px 14px 20px 14px !important;
+  gap: 8px !important;
+}
+
+/* AI Question Card: compact */
+.ie-ai-card {
+  padding: 10px 14px !important;
+  border-radius: 10px !important;
+  gap: 8px !important;
+  box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.3) !important;
+}
+
+.ie-ai-header {
+  padding-bottom: 6px !important;
+}
+
+.ie-ai-avatar-wrap {
+  gap: 8px !important;
+}
+
+.ie-ai-avatar {
+  width: 26px !important;
+  height: 26px !important;
+  font-size: 13px !important;
+}
+
+.ie-ai-avatar-meta strong {
+  font-size: 11.5px !important;
+}
+
+.ie-ai-speaking-status {
+  font-size: 9.5px !important;
+}
+
+.ie-audio-btn {
+  padding: 2.5px 8px !important;
+  font-size: 10px !important;
+  border-radius: 6px !important;
+}
+
+.ie-question-box {
+  gap: 6px !important;
+}
+
+.ie-q-meta-row {
+  gap: 6px !important;
+}
+
+.ie-q-type-badge {
+  font-size: 9px !important;
+  padding: 1.5px 6px !important;
+  border-radius: 4px !important;
+}
+
+.ie-q-skill-badge {
+  font-size: 9px !important;
+  padding: 1.5px 6px !important;
+  border-radius: 4px !important;
+}
+
+.ie-q-text {
+  font-size: 13.5px !important;
+  line-height: 1.4 !important;
+  font-weight: 600 !important;
+}
+
+/* Candidate Answer Section */
+.ie-answer-section {
+  padding: 10px 14px !important;
+  border-radius: 10px !important;
+  box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.3) !important;
+}
+
+.ie-answer-form {
+  gap: 6px !important;
+}
+
+.ie-answer-label {
+  font-size: 11px !important;
+  font-weight: 600 !important;
+}
+
+.ie-voice-btn {
+  padding: 2.5px 8px !important;
+  font-size: 10px !important;
+  border-radius: 6px !important;
+  gap: 4px !important;
+}
+
+.ie-answer-textarea {
+  min-height: 56px !important;
+  max-height: 90px !important;
+  padding: 6px 10px !important;
+  font-size: 11px !important;
+  border-radius: 8px !important;
+  line-height: 1.4 !important;
+}
+
+.ie-answer-textarea::placeholder {
+  font-size: 10.5px !important;
+}
+
+.ie-word-count {
+  font-size: 9.5px !important;
+}
+
+.ie-submit-btn {
+  min-width: 125px !important;
+  height: 28px !important;
+  padding: 0 12px !important;
+  font-size: 11px !important;
+  border-radius: 6px !important;
+  gap: 6px !important;
+}
+
+/* Answered Questions History Section */
+.ie-history-section {
+  padding: 8px 12px !important;
+  border-radius: 8px !important;
+  gap: 5px !important;
+}
+
+.ie-history-header h4 {
+  font-size: 10px !important;
+  letter-spacing: 0.3px !important;
+}
+
+.ie-history-list {
+  gap: 5px !important;
+  max-height: 120px !important;
+}
+
+.ie-history-item {
+  padding: 5px 8px !important;
+  gap: 2px !important;
+  border-radius: 6px !important;
+}
+
+.ie-hi-q-row {
+  font-size: 10.5px !important;
+  gap: 5px !important;
+}
+
+.ie-hi-num {
+  font-size: 9px !important;
+  padding: 1px 4px !important;
+}
+
+.ie-hi-answer {
+  font-size: 10px !important;
+  line-height: 1.35 !important;
+}
+
+/* Compact Confirmation Popup (Image 2) */
+.ie-modal-card {
+  max-width: 275px !important;
+  padding: 12px 14px !important;
+  border-radius: 10px !important;
+  box-shadow: 0 10px 25px -6px rgba(0, 0, 0, 0.3) !important;
+}
+
+.ie-modal-icon-wrap {
+  width: 26px !important;
+  height: 26px !important;
+  margin-bottom: 5px !important;
+}
+
+.ie-modal-icon-wrap svg {
+  width: 15px !important;
+  height: 15px !important;
+}
+
+.ie-modal-title {
+  font-size: 12.5px !important;
+  margin: 0 0 2px !important;
+  font-weight: 700 !important;
+}
+
+.ie-modal-desc {
+  font-size: 10px !important;
+  margin: 0 0 10px !important;
+  line-height: 1.35 !important;
+}
+
+.ie-modal-actions {
+  gap: 6px !important;
+}
+
+.ie-modal-btn {
+  padding: 4.5px 10px !important;
+  font-size: 10.5px !important;
+  border-radius: 6px !important;
+}
+
+
+/* ==========================================================================
+   Generous & Balanced Workspace Height (Eliminate Bottom Vacant Space)
+   ========================================================================== */
+
+.interview-env-wrapper {
+  min-height: 100vh !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.ie-stage-container {
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  max-width: 1000px !important;
+  width: 100% !important;
+  padding: 18px 24px 32px 24px !important;
+  gap: 16px !important;
+  min-height: calc(100vh - 44px) !important;
+}
+
+.ie-ai-card {
+  padding: 16px 20px !important;
+  border-radius: 12px !important;
+  gap: 10px !important;
+  flex-shrink: 0 !important;
+}
+
+.ie-q-text {
+  font-size: 15px !important;
+  line-height: 1.45 !important;
+  font-weight: 600 !important;
+}
+
+.ie-answer-section {
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 18px 22px !important;
+  border-radius: 14px !important;
+  min-height: 320px !important;
+}
+
+.ie-answer-form {
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+}
+
+.ie-answer-textarea {
+  flex: 1 !important;
+  min-height: 200px !important;
+  max-height: 480px !important;
+  padding: 14px 16px !important;
+  font-size: 13.5px !important;
+  line-height: 1.6 !important;
+  border-radius: 10px !important;
+  box-sizing: border-box !important;
+  background: rgba(15, 23, 42, 0.65) !important;
+}
+
+.ie-answer-footer {
+  margin-top: auto !important;
+  padding-top: 6px !important;
+}
+
+.ie-submit-btn {
+  height: 36px !important;
+  min-width: 155px !important;
+  padding: 0 20px !important;
+  font-size: 12.5px !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+}

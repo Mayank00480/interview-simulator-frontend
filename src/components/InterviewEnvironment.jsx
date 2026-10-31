@@ -25,6 +25,7 @@ export default function InterviewEnvironment({ session, questions = [], intervie
   const [completing, setCompleting] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
   const [completedSessionData, setCompletedSessionData] = useState(null);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   // Completed history
   const [history, setHistory] = useState([]);
@@ -96,6 +97,49 @@ export default function InterviewEnvironment({ session, questions = [], intervie
     }
     stopSpeaking();
     handleCompleteInterview();
+  };
+
+  // Confirmation Modal Popup
+  const renderConfirmModal = () => {
+    if (!showConfirmModal) return null;
+    return (
+      <div className="ie-modal-backdrop" onClick={() => !completing && setShowConfirmModal(false)}>
+        <div className="ie-modal-card" onClick={(e) => e.stopPropagation()}>
+          <div className="ie-modal-icon-wrap">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#eab308" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+          </div>
+          <h3 className="ie-modal-title">Complete Interview?</h3>
+          <p className="ie-modal-desc">
+            Are you sure you want to complete?
+          </p>
+          <div className="ie-modal-actions">
+            <button
+              type="button"
+              className="ie-modal-btn cancel"
+              onClick={() => setShowConfirmModal(false)}
+              disabled={completing}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              className="ie-modal-btn confirm"
+              onClick={() => {
+                setShowConfirmModal(false);
+                handleCompleteInterview();
+              }}
+              disabled={completing}
+            >
+              {completing ? 'Completing...' : 'Yes, Complete Interview'}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   // Text-to-Speech: AI speaks the question
@@ -227,8 +271,6 @@ export default function InterviewEnvironment({ session, questions = [], intervie
 
       // Check for follow-up question
       if (!activeQuestion.isFollowUp && result?.followUp && result.followUp.questionText) {
-        // AI has a follow-up for this main question!
-        showToast('AI Interviewer has a follow-up question for you.', 'info');
         setActiveQuestion({
           ...result.followUp,
           isFollowUp: true,
@@ -270,7 +312,7 @@ export default function InterviewEnvironment({ session, questions = [], intervie
           </div>
           <h2>All Questions Completed!</h2>
           <p className="ie-ready-desc">
-            Well done, <strong>{candidateName}</strong>! You have answered all {history.length} questions and follow-ups.
+            Well done, <strong>{candidateName}</strong>! You have answered all {history.length} questions.
           </p>
 
           <div className="ie-completed-stats-row">
@@ -297,7 +339,7 @@ export default function InterviewEnvironment({ session, questions = [], intervie
           <button
             type="button"
             className="submit-button ie-complete-action-btn"
-            onClick={handleCompleteInterview}
+            onClick={() => setShowConfirmModal(true)}
             disabled={completing}
           >
             {completing ? (
@@ -313,6 +355,7 @@ export default function InterviewEnvironment({ session, questions = [], intervie
             )}
           </button>
         </div>
+        {renderConfirmModal()}
       </div>
     );
   }
@@ -351,10 +394,6 @@ export default function InterviewEnvironment({ session, questions = [], intervie
               </div>
             )}
             <div className="ie-summary-item">
-              <span>Session Reference:</span>
-              <code>{sessionId}</code>
-            </div>
-            <div className="ie-summary-item">
               <span>Total Questions:</span>
               <strong>{history.length}</strong>
             </div>
@@ -373,12 +412,6 @@ export default function InterviewEnvironment({ session, questions = [], intervie
               Your responses have been recorded. The hiring team will review your interview assessment and follow up with you regarding next steps.
             </p>
           </div>
-
-          {onExit && (
-            <button type="button" className="submit-button ie-exit-btn" onClick={onExit}>
-              Close Session Portal
-            </button>
-          )}
         </div>
       </div>
     );
@@ -411,21 +444,14 @@ export default function InterviewEnvironment({ session, questions = [], intervie
           </div>
 
           <div className="ie-progress-pill">
-            <span>Main Q{currentMainIndex + 1} of {mainQuestions.length}</span>
-            {activeQuestion?.isFollowUp && (
-              <span className="ie-followup-pill">+ Follow-Up</span>
-            )}
+            <span>Question {history.length + 1}</span>
           </div>
 
           {history.length > 0 && (
             <button
               type="button"
               className="ie-top-complete-btn"
-              onClick={() => {
-                if (window.confirm('Are you sure you want to finalize and complete the interview now?')) {
-                  handleCompleteInterview();
-                }
-              }}
+              onClick={() => setShowConfirmModal(true)}
               disabled={completing}
               title="Finish and submit interview"
             >
@@ -478,15 +504,9 @@ export default function InterviewEnvironment({ session, questions = [], intervie
           {/* Question Display */}
           <div className="ie-question-box">
             <div className="ie-q-meta-row">
-              {activeQuestion?.isFollowUp ? (
-                <span className="ie-q-type-badge followup">
-                  ⚡ Follow-Up Question
-                </span>
-              ) : (
-                <span className="ie-q-type-badge main">
-                  Question {currentMainIndex + 1} of {mainQuestions.length}
-                </span>
-              )}
+              <span className="ie-q-type-badge main">
+                Question {history.length + 1}
+              </span>
 
               {activeQuestion?.skill && (
                 <span className="ie-q-skill-badge">
@@ -570,7 +590,7 @@ export default function InterviewEnvironment({ session, questions = [], intervie
                 <div key={idx} className="ie-history-item">
                   <div className="ie-hi-q-row">
                     <span className="ie-hi-num">
-                      {item.isFollowUp ? '⚡ Follow-Up' : `Q${idx + 1}`}
+                      {`Q${idx + 1}`}
                     </span>
                     <span className="ie-hi-text">{item.question.questionText}</span>
                   </div>
@@ -583,6 +603,7 @@ export default function InterviewEnvironment({ session, questions = [], intervie
           </section>
         )}
       </main>
+      {renderConfirmModal()}
     </div>
   );
 }

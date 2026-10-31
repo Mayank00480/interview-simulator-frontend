@@ -107,7 +107,6 @@ export default function GenerateQuestionsPanel({ interview, onSwitchToCreate }) 
           <div className="gqp-summary-meta">
             {interview?.duration && <span>⏱ {interview.duration} mins</span>}
             {interview?.questionCount && <span>❓ {interview.questionCount} Questions</span>}
-            {interviewId && <span className="gqp-id-text">ID: {interviewId}</span>}
           </div>
         </div>
 

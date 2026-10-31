@@ -91,6 +91,14 @@ export default function InterviewPage() {
     }
   };
 
+  const handleCopySessionUrl = (item) => {
+    const targetId = item._id || item.id;
+    if (!targetId) return;
+    const url = `${window.location.origin}/candidate-session/${targetId}`;
+    navigator.clipboard?.writeText(url);
+    showToast('Candidate session URL copied to clipboard!', 'success');
+  };
+
   return (
     <div className="interviews-page">
       {/* Page Header */}
@@ -341,6 +349,23 @@ export default function InterviewPage() {
                       {/* Action - Candidates & Eye buttons */}
                       <td className="cell-action" style={{ textAlign: 'center' }}>
                         <div className="table-actions-group">
+                          {status === 'PUBLISHED' && (
+                            <button
+                              type="button"
+                              className="action-copy-url-btn"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleCopySessionUrl(item);
+                              }}
+                              title="Copy Candidate Session URL"
+                              aria-label={`Copy candidate session URL for ${role}`}
+                            >
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                              </svg>
+                            </button>
+                          )}
                           <button
                             type="button"
                             className="action-candidates-btn"

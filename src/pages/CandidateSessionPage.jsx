@@ -1,15 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { createCandidateSession, getInterviewById } from '../services';
+import { createCandidateSession } from '../services';
 import { useToast } from '../context/ToastContext';
 import InterviewEnvironment from '../components/InterviewEnvironment';
 
 export default function CandidateSessionPage() {
   const { interviewId } = useParams();
   const { showToast } = useToast();
-
-  const [interview, setInterview] = useState(null);
-  const [loadingInterview, setLoadingInterview] = useState(true);
 
   // Form fields
   const [candidateName, setCandidateName] = useState('');
@@ -21,29 +18,6 @@ export default function CandidateSessionPage() {
   // Active Session & Questions State
   const [activeSession, setActiveSession] = useState(null);
   const [sessionQuestions, setSessionQuestions] = useState([]);
-
-  // Fetch interview details on load
-  useEffect(() => {
-    let isMounted = true;
-    async function fetchInterview() {
-      if (!interviewId) return;
-      try {
-        const data = await getInterviewById(interviewId);
-        if (isMounted && data) {
-          setInterview(data);
-        }
-      } catch (err) {
-        console.warn('Could not load interview details:', err);
-      } finally {
-        if (isMounted) setLoadingInterview(false);
-      }
-    }
-
-    fetchInterview();
-    return () => {
-      isMounted = false;
-    };
-  }, [interviewId]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -87,7 +61,6 @@ export default function CandidateSessionPage() {
       <InterviewEnvironment
         session={activeSession}
         questions={sessionQuestions}
-        interview={interview}
         onExit={() => {
           setActiveSession(null);
           setSessionQuestions([]);
@@ -107,47 +80,15 @@ export default function CandidateSessionPage() {
           </div>
           <h1 className="cs-page-title">Candidate Interview Portal</h1>
           <p className="cs-page-subtitle">
-            {interview?.jobRole
-              ? `You have been invited to interview for ${interview.jobRole}`
-              : 'Register your details to start your AI technical interview session'}
+            Enter your details below to begin your AI technical interview assessment.
           </p>
         </div>
-
-        {/* Interview summary preview */}
-        {interview && (
-          <div className="cs-interview-summary">
-            <div className="cs-summary-main">
-              <span className="cs-role-name">{interview.jobRole}</span>
-              {interview.experienceLevel && (
-                <span className="cs-level-pill">{interview.experienceLevel}</span>
-              )}
-            </div>
-            <div className="cs-summary-meta">
-              {interview.duration && <span>⏱ Duration: {interview.duration} mins</span>}
-              {interview.questionCount && (
-                <span>❓ {interview.questionCount} Questions</span>
-              )}
-            </div>
-            {interview.skills && interview.skills.length > 0 && (
-              <div className="cs-skills-row">
-                <span className="cs-skills-label">Assessed Skills:</span>
-                <div className="cs-skills-tags">
-                  {interview.skills.map((skill) => (
-                    <span key={skill} className="skill-pill">
-                      {skill}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
 
         {/* Registration Form */}
         <form onSubmit={handleSubmit} className="candidate-session-form">
           <div className="cs-form-intro">
             <h3>Enter Your Details to Begin</h3>
-            <p>Please enter your information to start your AI interview assessment.</p>
+            <p>Please provide your information to start your interview session.</p>
           </div>
 
           <div className="form-group">

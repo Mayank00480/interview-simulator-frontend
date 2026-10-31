@@ -60,9 +60,42 @@ export default function InterviewEnvironment({ session, questions = [], intervie
     return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
   };
 
+  // Final Complete Interview API call
+  const handleCompleteInterview = async () => {
+    if (!sessionId) {
+      showToast('Session reference missing.', 'error');
+      return;
+    }
+
+    setCompleting(true);
+    try {
+      const response = await completeSession(sessionId);
+      const sessionData = response?.session || response?.data || response;
+      setCompletedSessionData(sessionData);
+      setIsCompleted(true);
+      showToast(response?.message || 'Session completed successfully!', 'success');
+    } catch (err) {
+      console.error('Complete interview error:', err);
+      const msg =
+        err?.response?.data?.message ||
+        err?.message ||
+        'Failed to complete interview session.';
+      showToast(msg, 'error');
+      // Transition to completed so candidate is not stranded
+      setIsCompleted(true);
+    } finally {
+      setCompleting(false);
+    }
+  };
+
   const handleTimeExpired = () => {
-    showToast('Interview duration has expired. Please complete your interview.', 'warning');
-    setReadyToComplete(true);
+    showToast('Interview duration has expired! Automatically completing and submitting interview...', 'warning');
+    if (isListening && recognitionRef.current) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    }
+    stopSpeaking();
+    handleCompleteInterview();
   };
 
   // Text-to-Speech: AI speaks the question
@@ -224,32 +257,6 @@ export default function InterviewEnvironment({ session, questions = [], intervie
       showToast(msg, 'error');
     } finally {
       setSubmitting(false);
-    }
-  };
-
-  // Final Complete Interview API call
-  const handleCompleteInterview = async () => {
-    if (!sessionId) {
-      showToast('Session reference missing.', 'error');
-      return;
-    }
-
-    setCompleting(true);
-    try {
-      const response = await completeSession(sessionId);
-      const sessionData = response?.session || response?.data || response;
-      setCompletedSessionData(sessionData);
-      setIsCompleted(true);
-      showToast(response?.message || 'Session completed successfully!', 'success');
-    } catch (err) {
-      console.error('Complete interview error:', err);
-      const msg =
-        err?.response?.data?.message ||
-        err?.message ||
-        'Failed to complete interview session.';
-      showToast(msg, 'error');
-    } finally {
-      setCompleting(false);
     }
   };
 

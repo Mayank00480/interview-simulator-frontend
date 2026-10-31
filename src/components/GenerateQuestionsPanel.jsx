@@ -57,12 +57,7 @@ export default function GenerateQuestionsPanel({ interview, onSwitchToCreate }) 
     try {
       const response = await publishInterview(interviewId);
       setIsPublished(true);
-      showToast(response?.message || 'Interview published successfully!', 'success');
-
-      // Auto-navigate to interviews directory after short delay
-      setTimeout(() => {
-        navigate('/interviews');
-      }, 1500);
+      showToast(response?.message || 'Interview published successfully! Session URL is now available to share.', 'success');
     } catch (err) {
       console.error('Publish interview error:', err);
       const errorMessage =
@@ -130,8 +125,8 @@ export default function GenerateQuestionsPanel({ interview, onSwitchToCreate }) 
         )}
       </div>
 
-      {/* Candidate Session URL Box */}
-      {interviewId && (
+      {/* Candidate Session URL Box (Visible ONLY after interview is published) */}
+      {interviewId && isPublished && (
         <div className="gqp-share-session-card">
           <div className="gqp-share-header">
             <span className="gqp-share-icon">🔗</span>

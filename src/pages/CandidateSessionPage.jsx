@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { createCandidateSession, getInterviewById } from '../services';
 import { useToast } from '../context/ToastContext';
+import InterviewEnvironment from '../components/InterviewEnvironment';
 
 export default function CandidateSessionPage() {
   const { interviewId } = useParams();
@@ -16,7 +17,10 @@ export default function CandidateSessionPage() {
   const [candidatePhone, setCandidatePhone] = useState('');
 
   const [submitting, setSubmitting] = useState(false);
-  const [sessionCreated, setSessionCreated] = useState(null);
+
+  // Active Session & Questions State
+  const [activeSession, setActiveSession] = useState(null);
+  const [sessionQuestions, setSessionQuestions] = useState([]);
 
   // Fetch interview details on load
   useEffect(() => {
@@ -29,7 +33,6 @@ export default function CandidateSessionPage() {
           setInterview(data);
         }
       } catch (err) {
-        // If interview details fetch fails (e.g. private or endpoint difference), we still allow session creation
         console.warn('Could not load interview details:', err);
       } finally {
         if (isMounted) setLoadingInterview(false);
@@ -60,8 +63,12 @@ export default function CandidateSessionPage() {
 
       const result = await createCandidateSession(interviewId, payload);
       const sessionData = result?.session || result?.data || result;
-      setSessionCreated(sessionData);
-      showToast(result?.message || 'Interview session created successfully!', 'success');
+      const questionsList = Array.isArray(result?.questions) ? result.questions : [];
+
+      setActiveSession(sessionData);
+      setSessionQuestions(questionsList);
+
+      showToast(result?.message || 'Session started successfully!', 'success');
     } catch (err) {
       console.error('Session creation failed:', err);
       const msg =
@@ -73,6 +80,21 @@ export default function CandidateSessionPage() {
       setSubmitting(false);
     }
   };
+
+  // If session is active and has questions, transition into Interview Environment
+  if (activeSession && sessionQuestions.length > 0) {
+    return (
+      <InterviewEnvironment
+        session={activeSession}
+        questions={sessionQuestions}
+        interview={interview}
+        onExit={() => {
+          setActiveSession(null);
+          setSessionQuestions([]);
+        }}
+      />
+    );
+  }
 
   return (
     <div className="candidate-session-page-wrapper">
@@ -121,142 +143,90 @@ export default function CandidateSessionPage() {
           </div>
         )}
 
-        {/* Success Confirmation State */}
-        {sessionCreated ? (
-          <div className="cs-success-state">
-            <div className="cs-success-icon-wrap">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-            </div>
-            <h2>Session Registered Successfully!</h2>
-            <p className="cs-success-desc">
-              Welcome, <strong>{candidateName}</strong>! Your session is confirmed and ready to begin.
-            </p>
+        {/* Registration Form */}
+        <form onSubmit={handleSubmit} className="candidate-session-form">
+          <div className="cs-form-intro">
+            <h3>Enter Your Details to Begin</h3>
+            <p>Please enter your information to start your AI interview assessment.</p>
+          </div>
 
-            <div className="cs-session-details-box">
-              <div className="cs-detail-row">
-                <span>Candidate Name:</span>
-                <strong>{candidateName}</strong>
-              </div>
-              <div className="cs-detail-row">
-                <span>Email Address:</span>
-                <strong>{candidateEmail}</strong>
-              </div>
-              {candidatePhone && (
-                <div className="cs-detail-row">
-                  <span>Phone Number:</span>
-                  <strong>{candidatePhone}</strong>
-                </div>
-              )}
-              {sessionCreated._id && (
-                <div className="cs-detail-row">
-                  <span>Session Reference:</span>
-                  <code>{sessionCreated._id}</code>
-                </div>
-              )}
-              <div className="cs-detail-row">
-                <span>Status:</span>
-                <span className="cs-status-ready">Ready to Start</span>
-              </div>
-            </div>
-
-            {/* Preparation checklist */}
-            <div className="cs-prep-box">
-              <h4>Before You Begin:</h4>
-              <ul>
-                <li>✓ Find a quiet room with minimal background noise.</li>
-                <li>✓ Ensure your microphone and audio speakers are functional.</li>
-                <li>✓ Speak clearly when answering technical questions.</li>
-              </ul>
+          <div className="form-group">
+            <label className="form-label">Full Name *</label>
+            <div className="input-wrapper">
+              <span className="input-icon-left">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
+                </svg>
+              </span>
+              <input
+                type="text"
+                className="form-input"
+                placeholder="e.g. Mayank"
+                value={candidateName}
+                onChange={(e) => setCandidateName(e.target.value)}
+                required
+              />
             </div>
           </div>
-        ) : (
-          /* Registration Form */
-          <form onSubmit={handleSubmit} className="candidate-session-form">
-            <div className="cs-form-intro">
-              <h3>Enter Your Information</h3>
-              <p>Please enter your details to generate your interview session.</p>
-            </div>
 
-            <div className="form-group">
-              <label className="form-label">Full Name *</label>
-              <div className="input-wrapper">
-                <span className="input-icon-left">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                    <circle cx="12" cy="7" r="4" />
-                  </svg>
-                </span>
-                <input
-                  type="text"
-                  className="form-input"
-                  placeholder="e.g. Mayank Sharma"
-                  value={candidateName}
-                  onChange={(e) => setCandidateName(e.target.value)}
-                  required
-                />
-              </div>
+          <div className="form-group">
+            <label className="form-label">Email Address *</label>
+            <div className="input-wrapper">
+              <span className="input-icon-left">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                  <polyline points="22,6 12,13 2,6" />
+                </svg>
+              </span>
+              <input
+                type="email"
+                className="form-input"
+                placeholder="e.g. mayanksharma1937@gmail.com"
+                value={candidateEmail}
+                onChange={(e) => setCandidateEmail(e.target.value)}
+                required
+              />
             </div>
+          </div>
 
-            <div className="form-group">
-              <label className="form-label">Email Address *</label>
-              <div className="input-wrapper">
-                <span className="input-icon-left">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                    <polyline points="22,6 12,13 2,6" />
-                  </svg>
-                </span>
-                <input
-                  type="email"
-                  className="form-input"
-                  placeholder="e.g. mayank111sharma@gmail.com"
-                  value={candidateEmail}
-                  onChange={(e) => setCandidateEmail(e.target.value)}
-                  required
-                />
-              </div>
+          <div className="form-group">
+            <label className="form-label">Phone Number *</label>
+            <div className="input-wrapper">
+              <span className="input-icon-left">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                </svg>
+              </span>
+              <input
+                type="tel"
+                className="form-input"
+                placeholder="e.g. 9191919191"
+                value={candidatePhone}
+                onChange={(e) => setCandidatePhone(e.target.value)}
+                required
+              />
             </div>
+          </div>
 
-            <div className="form-group">
-              <label className="form-label">Phone Number *</label>
-              <div className="input-wrapper">
-                <span className="input-icon-left">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-                  </svg>
-                </span>
-                <input
-                  type="tel"
-                  className="form-input"
-                  placeholder="e.g. 919292929"
-                  value={candidatePhone}
-                  onChange={(e) => setCandidatePhone(e.target.value)}
-                  required
-                />
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              className="submit-button cs-submit-btn"
-              disabled={submitting}
-            >
-              {submitting ? (
-                <>
-                  <span className="btn-spinner" />
-                  <span>Creating Session...</span>
-                </>
-              ) : (
-                <>
-                  <span>Start Interview Session</span>
-                  <span>→</span>
-                </>
-              )}
-            </button>
-          </form>
-        )}
+          <button
+            type="submit"
+            className="submit-button cs-submit-btn"
+            disabled={submitting}
+          >
+            {submitting ? (
+              <>
+                <span className="btn-spinner" />
+                <span>Entering Interview Room...</span>
+              </>
+            ) : (
+              <>
+                <span>Start Interview Session</span>
+                <span>→</span>
+              </>
+            )}
+          </button>
+        </form>
 
         <div className="cs-footer">
           <span>Powered by AI Interview Simulator</span>
@@ -265,4 +235,3 @@ export default function CandidateSessionPage() {
     </div>
   );
 }
-

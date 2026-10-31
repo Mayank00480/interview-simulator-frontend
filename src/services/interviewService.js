@@ -133,6 +133,29 @@ export async function getInterviewById(interviewId) {
   }
 }
 
+/**
+ * Submit an answer for a session question
+ * Endpoint: POST http://localhost:3000/api/sessions/:sessionId/answers
+ * Body: { questionId, answer }
+ */
+export async function submitSessionAnswer(sessionId, { questionId, answer }) {
+  try {
+    const response = await api.post(`/sessions/${sessionId}/answers`, {
+      questionId,
+      answer,
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Submit session answer error:', error);
+    const message =
+      error.response?.data?.message ||
+      error.response?.data?.error ||
+      error.message ||
+      'Failed to submit answer.';
+    throw new Error(message);
+  }
+}
+
 export async function getSessionQuestions(sessionId) {
   try {
     const response = await api.get(`/sessions/${sessionId}/questions`);

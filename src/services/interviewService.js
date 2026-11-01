@@ -190,3 +190,72 @@ export async function getSessionQuestions(sessionId) {
   }
 }
 
+/**
+ * Add a question to an interview
+ * Endpoint: POST http://localhost:3000/api/interviews/:id/questions
+ * Body: { questionText, skill }
+ */
+export async function addInterviewQuestion(interviewId, questionData) {
+  try {
+    const response = await api.post(`/interviews/${interviewId}/questions`, questionData);
+    return response.data;
+  } catch (error) {
+    console.error('Add interview question error:', error);
+    const message =
+      error.response?.data?.message ||
+      error.response?.data?.error ||
+      error.message ||
+      'Failed to add question.';
+    throw new Error(message);
+  }
+}
+
+/**
+ * Delete a question from an interview
+ * Endpoint: DELETE http://localhost:3000/api/interviews/:id/questions/:questionId
+ */
+export async function deleteInterviewQuestion(interviewId, questionId) {
+  try {
+    const response = await api.delete(`/interviews/${interviewId}/questions/${questionId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Delete interview question error:', error);
+    const message =
+      error.response?.data?.message ||
+      error.response?.data?.error ||
+      error.message ||
+      'Failed to delete question.';
+    throw new Error(message);
+  }
+}
+
+/**
+ * Edit / Update an interview question
+ * Endpoint: PUT or PATCH http://localhost:3000/api/interviews/:id/questions/:questionId
+ * Body: { questionText, skill }
+ */
+export async function updateInterviewQuestion(interviewId, questionId, questionData) {
+  try {
+    // Try PUT first as specified
+    const response = await api.put(`/interviews/${interviewId}/questions/${questionId}`, questionData);
+    return response.data;
+  } catch (error) {
+    // Fallback to PATCH if PUT is not allowed or not found
+    if (error.response?.status === 404 || error.response?.status === 405) {
+      try {
+        const patchResponse = await api.patch(`/interviews/${interviewId}/questions/${questionId}`, questionData);
+        return patchResponse.data;
+      } catch (patchErr) {
+        throw patchErr;
+      }
+    }
+    console.error('Update interview question error:', error);
+    const message =
+      error.response?.data?.message ||
+      error.response?.data?.error ||
+      error.message ||
+      'Failed to update question.';
+    throw new Error(message);
+  }
+}
+

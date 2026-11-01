@@ -36,6 +36,7 @@ function App() {
             <Route path="/interviews/:interviewId/candidates" element={<InterviewCandidatesPage />} />
             <Route path="/interviews/:interviewId" element={<InterviewCandidatesPage />} />
             <Route path="/create-interview" element={<CreateInterviewPage />} />
+            <Route path="/create-interviews" element={<CreateInterviewPage />} />
             <Route path="/dashboard" element={<Navigate to="/interviews" replace />} />
           </Route>
 

@@ -1,0 +1,437 @@
+/* ==========================================================================
+   Responsive layer (tablet + mobile). Loaded last, after ui-polish.css.
+   Breakpoints:
+     <= 1024px  tablet   : sidebar becomes an icon rail
+     <=  640px  mobile   : sidebar becomes a fixed bottom tab bar,
+                           tables become stacked cards, modals become sheets
+   ========================================================================== */
+
+/* ------------------------------- Tablet ---------------------------------- */
+@media (max-width: 1024px) {
+  /* Sidebar -> icon rail */
+  .sb { width: 68px; padding: 12px 8px; align-items: center; }
+  .sb-nav { width: 100%; align-items: center; }
+  .sb-link { justify-content: center; width: 44px; height: 44px; padding: 0; }
+  .sb-link span { display: none; }
+  .sb-link.is-active::before { left: -8px; }
+  .sb-robot { display: none; }
+  .sb-bottom { align-items: center; }
+  .sb-status { padding: 0; width: 28px; height: 28px; justify-content: center; border-radius: 50%; }
+  .sb-status span:last-child { display: none; }
+
+  /* Tooltip label on hover for the rail */
+  .sb-link:hover span {
+    display: block;
+    position: absolute;
+    left: calc(100% + 10px);
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 4px 8px;
+    border-radius: 6px;
+    background: var(--ui-text);
+    color: #fff;
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 30;
+  }
+
+  .app-shell .app-main-content { padding: 12px !important; }
+
+  /* Create form: stack columns, let the card size to content */
+  .ci-grid { grid-template-columns: 1fr; }
+  .app-shell .create-interview-layout.ci-shell { min-height: 0; }
+  .ci-tags-box { flex: 0 0 auto; }
+  .ci-textarea { min-height: 120px; }
+
+  /* Interviews table: drop the least useful columns */
+  .app-shell .ip-table th:nth-child(6),
+  .app-shell .ip-table td:nth-child(6) { display: none; }
+  .app-shell .cand-table th:nth-child(3),
+  .app-shell .cand-table td:nth-child(3) { display: none; }
+}
+
+/* -------------------------------- Mobile --------------------------------- */
+@media (max-width: 640px) {
+  /* Navbar */
+  .app-shell .app-navbar { height: 52px !important; padding: 0 12px !important; }
+  .app-shell .nav-subtitle,
+  .app-shell .user-meta,
+  .app-shell .user-arrow { display: none !important; }
+  .app-shell .nav-title { font-size: var(--fs-md) !important; }
+  .app-shell .user-pill-btn { padding: 3px !important; }
+
+  /* Sidebar -> bottom tab bar */
+  .app-shell .app-body { flex-direction: column !important; }
+  .sb {
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 40;
+    width: 100%;
+    height: auto;
+    padding: 6px 12px calc(6px + env(safe-area-inset-bottom));
+    flex-direction: row;
+    border-right: 0;
+    border-top: 1px solid var(--ui-border);
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 -6px 20px rgba(15, 23, 42, 0.06);
+  }
+  .sb-nav { flex-direction: row; justify-content: space-around; gap: 6px; }
+  .sb-link {
+    flex: 1;
+    width: auto;
+    height: 48px;
+    flex-direction: column;
+    gap: 2px;
+    border-radius: 12px;
+  }
+  .sb-link span { display: block !important; position: static !important; transform: none !important; padding: 0 !important; background: none !important; color: inherit !important; font-size: var(--fs-xs) !important; }
+  .sb-link.is-active::before { left: 30%; right: 30%; top: -6px; bottom: auto; width: auto; height: 3px; border-radius: 0 0 3px 3px; }
+  .sb-bottom { display: none; }
+  .app-shell .app-main-content { padding: 10px 10px calc(76px + env(safe-area-inset-bottom)) !important; }
+
+  /* Page cards */
+  .app-shell .interviews-page,
+  .app-shell .ci-shell .create-interview-page-wrapper { border-radius: 14px !important; }
+  .app-shell .interviews-page .ip-head { flex-wrap: wrap; padding: 12px !important; gap: 10px !important; }
+  .app-shell .interviews-page .header-text-group { flex: 1 1 calc(100% - 50px); }
+  .ip-head-icon, .ci-top-icon { width: 34px; height: 34px; }
+  .ip-create-btn, .ip-back-btn { width: 100%; justify-content: center; height: 36px; }
+  .ip-role-chip { display: inline-block; margin: 2px 0 0; }
+
+  /* Toolbar: scrollable tabs, full-width search */
+  .app-shell .interviews-toolbar { padding: 10px 12px !important; flex-direction: column; align-items: stretch !important; }
+  .app-shell .status-tabs { overflow-x: auto; scrollbar-width: none; }
+  .app-shell .status-tabs::-webkit-scrollbar { display: none; }
+  .app-shell .status-tab { flex-shrink: 0; }
+  .app-shell .search-bar-wrap { flex: 1 1 auto !important; width: 100% !important; }
+  .app-shell .search-input { height: 34px !important; font-size: 14px !important; }
+
+  /* Stat cards */
+  .app-shell .candidates-stat-grid { margin: 0 12px !important; gap: 6px !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+  .app-shell .stat-card { flex-direction: column !important; align-items: flex-start !important; gap: 4px !important; padding: 8px !important; }
+  .app-shell .stat-icon-wrap { width: 24px !important; height: 24px !important; }
+  .app-shell .stat-icon-wrap svg { width: 13px; height: 13px; }
+
+  /* Tables -> stacked cards */
+  .app-shell .interviews-table-card { margin: 0 12px 12px !important; border: 0 !important; background: transparent !important; overflow: visible; }
+  .app-shell .table-responsive { overflow: visible !important; }
+  .app-shell .interviews-table,
+  .app-shell .interviews-table tbody { display: block; table-layout: auto; }
+  .app-shell .interviews-table thead { display: none; }
+  .app-shell .interviews-table tbody tr {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 12px;
+    margin-bottom: 10px;
+    padding: 12px;
+    border: 1px solid var(--ui-border);
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+  }
+  .app-shell .interviews-table tbody tr:hover td { background: transparent !important; }
+  .app-shell .interviews-table tbody td {
+    display: flex !important;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+    min-width: 0;
+    padding: 0 !important;
+    border: 0 !important;
+    text-align: left !important;
+    white-space: normal;
+  }
+  .app-shell .interviews-table tbody td::before {
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ui-faint);
+  }
+  .app-shell .interviews-table tbody td.empty-table-cell { grid-column: 1 / -1; }
+  .app-shell .interviews-table tbody td.empty-table-cell::before { content: none; }
+  .app-shell .table-skeleton-row td::before { content: none !important; }
+
+  /* Interviews list card layout */
+  .app-shell .ip-table td:nth-child(6) { display: flex !important; }
+  .app-shell .ip-table td:nth-child(1) { grid-column: 1 / -1; padding-bottom: 8px !important; border-bottom: 1px solid #f0f3f9 !important; }
+  .app-shell .ip-table td:nth-child(3) { grid-column: 1 / -1; }
+  .app-shell .ip-table td:nth-child(8) { grid-column: 1 / -1; align-items: stretch; padding-top: 8px !important; border-top: 1px solid #f0f3f9 !important; }
+  .app-shell .ip-table td:nth-child(2)::before { content: 'Experience'; }
+  .app-shell .ip-table td:nth-child(3)::before { content: 'Skills'; }
+  .app-shell .ip-table td:nth-child(4)::before { content: 'Duration'; }
+  .app-shell .ip-table td:nth-child(5)::before { content: 'Questions'; }
+  .app-shell .ip-table td:nth-child(6)::before { content: 'Expires / Created'; }
+  .app-shell .ip-table td:nth-child(7)::before { content: 'Status'; }
+  .app-shell .ip-table .table-actions-group { width: 100%; justify-content: flex-end; gap: 8px !important; }
+  .app-shell .ip-table .action-copy-url-btn,
+  .app-shell .ip-table .action-candidates-btn,
+  .app-shell .ip-table .action-eye-btn { width: 36px !important; height: 36px !important; }
+
+  /* Candidates list card layout */
+  .app-shell .cand-table td:nth-child(3) { display: flex !important; }
+  .app-shell .cand-table td:nth-child(1) { grid-column: 1 / -1; }
+  .app-shell .cand-table td:nth-child(2) { grid-column: 1 / -1; }
+  .app-shell .cand-table td:nth-child(7) { grid-column: 1 / -1; align-items: stretch; }
+  .app-shell .cand-table td:nth-child(2)::before { content: 'Email'; }
+  .app-shell .cand-table td:nth-child(3)::before { content: 'Phone'; }
+  .app-shell .cand-table td:nth-child(4)::before { content: 'Score'; }
+  .app-shell .cand-table td:nth-child(5)::before { content: 'Status'; }
+  .app-shell .cand-table td:nth-child(6)::before { content: 'Completed'; }
+  .app-shell .cand-table .text-secondary { word-break: break-all; }
+  .app-shell .cand-table .view-eval-btn { width: 100%; height: 36px !important; }
+
+  /* Stepper */
+  .stp { padding: 4px 0; }
+  .stp-desc { display: none; }
+  .stp-line { width: 40px; margin: 0 8px; }
+  .stp-dot { width: 24px; height: 24px; }
+  .stp-title { font-size: var(--fs-sm); }
+
+  /* Create form */
+  .ci { padding: 12px; }
+  .ci-top { margin-bottom: 10px; }
+  .ci-row-2, .ci-row-3 { grid-template-columns: 1fr; }
+  .ci-control { height: 36px; font-size: 14px; }
+  .ci-textarea { height: auto; min-height: 120px; }
+  .ci-btn-add { height: 40px; }
+  .ci-actions {
+    position: sticky;
+    bottom: calc(61px + env(safe-area-inset-bottom));
+    z-index: 5;
+    flex-direction: row;
+    margin: 12px -12px -12px;
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(8px);
+  }
+  .ci-btn-ghost { flex: 0 0 auto; height: 42px; }
+  .ci-btn-primary { flex: 1; justify-content: center; height: 42px; }
+
+  /* Modals -> bottom sheets */
+  .jd-modal-backdrop,
+  .jd-modal-overlay { align-items: flex-end !important; padding: 0 !important; }
+  .session-modal-container,
+  .jd-modal-container,
+  .jd-modal-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 92vh !important;
+    border-radius: 18px 18px 0 0 !important;
+    margin: 0 !important;
+    animation: sheet-up 0.25s ease backwards;
+  }
+  .session-modal-container .jd-modal-body { max-height: calc(92vh - 130px) !important; padding: 14px !important; }
+  .session-modal-container .jd-modal-header { padding: 12px 14px !important; }
+  .session-modal-container .jd-modal-footer { padding: 10px 14px calc(10px + env(safe-area-inset-bottom)) !important; }
+  .session-modal-container .jd-modal-close-action { width: 100%; height: 40px; }
+}
+
+@keyframes sheet-up { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+/* Larger tap targets on touch devices regardless of width */
+@media (hover: none) and (pointer: coarse) {
+  .ci-chip { padding: 6px 12px; }
+  .ci-tag button { width: 22px; height: 22px; }
+  .app-shell .status-tab { height: 34px !important; }
+}
+
+/* Auth page: on phones show brand + headline only, so the form is reachable
+   without scrolling past the marketing content */
+@media (max-width: 640px) {
+  .auth-grid-left .features-list,
+  .auth-grid-left .hero-visual-container,
+  .auth-grid-left .hero-description { display: none !important; }
+  .auth-grid-left .hero-content { margin-bottom: 0 !important; }
+  .auth-grid-left .hero-title { font-size: 20px !important; margin-bottom: 0 !important; }
+}
+
+/* Sticky action bar needs no clipping ancestor */
+@media (max-width: 640px) {
+  .app-shell .ci-shell .create-interview-page-wrapper,
+  .app-shell .ci-shell .create-interview-main-column,
+  .ci-card,
+  .app-shell .app-main-content { overflow: visible !important; }
+  .ci-actions { border-radius: 0 0 14px 14px; box-shadow: 0 -6px 16px rgba(15, 23, 42, 0.06); }
+}
+
+/* Card field order on phones: title, experience + status, skills, numbers, actions */
+@media (max-width: 640px) {
+  .app-shell .ip-table td:nth-child(1) { order: 1; }
+  .app-shell .ip-table td:nth-child(2) { order: 2; }
+  .app-shell .ip-table td:nth-child(7) { order: 3; }
+  .app-shell .ip-table td:nth-child(3) { order: 4; }
+  .app-shell .ip-table td:nth-child(4) { order: 5; }
+  .app-shell .ip-table td:nth-child(5) { order: 6; }
+  .app-shell .ip-table td:nth-child(6) { order: 7; }
+  .app-shell .ip-table td:nth-child(8) { order: 8; }
+}
+
+/* Tablet: keep the rail beside content (App.css stacks .app-body at <=960px) */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .app-shell .app-body { flex-direction: row !important; }
+  .sb { position: sticky; top: 48px; height: calc(100vh - 48px); flex-direction: column; border-right: 1px solid var(--ui-border); border-bottom: 0; }
+  .sb-nav { flex-direction: column; }
+}
+
+/* Mobile sheet: beat App.css base modal rules */
+@media (max-width: 640px) {
+  body .jd-modal-backdrop.jd-modal-backdrop,
+  body .jd-modal-overlay.jd-modal-overlay { align-items: flex-end !important; padding: 0 !important; }
+}
+
+/* Tablet table widths: give the name column room */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .app-shell .cand-table th:nth-child(2) { width: 28% !important; }
+  .app-shell .cand-table th:nth-child(4) { width: 60px !important; }
+  .app-shell .cand-table th:nth-child(5) { width: 118px !important; }
+  .app-shell .cand-table th:nth-child(6) { width: 0 !important; }
+  .app-shell .cand-table th:nth-child(6),
+  .app-shell .cand-table td:nth-child(6) { display: none; }
+  .app-shell .cand-table th:nth-child(7) { width: 76px !important; }
+  .app-shell .ip-table th:nth-child(2) { width: 15% !important; }
+  .app-shell .ip-table th:nth-child(3) { width: 22% !important; }
+  .app-shell .ip-table th:nth-child(4) { width: 64px !important; }
+  .app-shell .ip-table th:nth-child(5) { width: 70px !important; }
+  .app-shell .ip-table th:nth-child(7) { width: 104px !important; }
+  .app-shell .ip-table th:nth-child(8) { width: 112px !important; }
+}
+@media (min-width: 641px) and (max-width: 900px) {
+  .app-shell .ip-table th:nth-child(3), .app-shell .ip-table td:nth-child(3),
+  .app-shell .ip-table th:nth-child(4), .app-shell .ip-table td:nth-child(4) { display: none; }
+}
+
+/* ---------------- Compact density for tablet + mobile ---------------- */
+@media (max-width: 1024px) {
+  :root {
+    --fs-xs: 9.5px;
+    --fs-sm: 10.5px;
+    --fs-base: 11.5px;
+    --fs-md: 12.5px;
+    --fs-lg: 14px;
+  }
+  .app-shell .app-navbar { height: 46px !important; }
+  .app-shell .interviews-page .ip-head { padding: 10px 12px 8px !important; }
+  .app-shell .interviews-toolbar { padding: 8px 12px !important; }
+  .app-shell .interviews-table-card { margin: 0 12px 12px !important; }
+  .app-shell .interviews-table thead th { padding: 7px 8px !important; }
+  .app-shell .interviews-table tbody td { padding: 7px 8px !important; }
+  .ci { padding: 10px 12px; }
+  .ci-title { font-size: var(--fs-lg); }
+  .ci-card-head { padding: 6px 10px; gap: 8px; }
+  .ci-card-body { padding: 8px 10px 10px; gap: 7px; }
+  .ci-card-icon { width: 24px; height: 24px; }
+  .ci-card-icon svg { width: 13px; height: 13px; }
+  .ci-top-icon, .ip-head-icon { width: 30px; height: 30px; border-radius: 8px; }
+  .ci-top-icon svg, .ip-head-icon svg { width: 15px; height: 15px; }
+  .ci-grid, .ci-col { gap: 10px; }
+  .stp-dot { width: 22px; height: 22px; font-size: 10.5px; }
+}
+
+@media (max-width: 640px) {
+  .app-shell .app-navbar { height: 46px !important; padding: 0 10px !important; }
+  .app-shell .nav-logo-box { width: 30px !important; height: 30px !important; }
+  .app-shell .user-avatar { width: 26px !important; height: 26px !important; font-size: 11px !important; }
+  .app-shell .app-main-content { padding: 8px 8px calc(62px + env(safe-area-inset-bottom)) !important; }
+
+  /* Bottom bar */
+  .sb { padding: 4px 10px calc(4px + env(safe-area-inset-bottom)); }
+  .sb-link { height: 44px; border-radius: 10px; }
+  .sb-link svg { width: 16px; height: 16px; }
+  .sb-link.is-active::before { top: -4px; }
+
+  /* Headers / toolbar */
+  .app-shell .interviews-page .ip-head { padding: 10px !important; gap: 8px !important; }
+  .ip-create-btn, .ip-back-btn { height: 32px; font-size: var(--fs-base); }
+  .app-shell .interviews-toolbar { padding: 6px 10px 8px !important; gap: 8px !important; }
+  .app-shell .status-tab { height: 26px !important; padding: 0 9px !important; }
+
+  /* Stat cards */
+  .app-shell .candidates-stat-grid { margin: 0 10px !important; }
+  .app-shell .stat-card { padding: 6px 8px !important; }
+  .app-shell .stat-icon-wrap { display: none !important; }
+
+  /* Table cards */
+  .app-shell .interviews-table-card { margin: 0 10px 10px !important; }
+  .app-shell .interviews-table tbody tr { gap: 6px 10px; padding: 10px; margin-bottom: 8px; border-radius: 10px; }
+  .app-shell .interviews-table tbody td { padding: 0 !important; }
+  .app-shell .ip-table td:nth-child(1) { padding-bottom: 6px !important; }
+  .app-shell .ip-table td:nth-child(8) { padding-top: 6px !important; }
+  .app-shell .ip-table .action-copy-url-btn,
+  .app-shell .ip-table .action-candidates-btn,
+  .app-shell .ip-table .action-eye-btn { width: 32px !important; height: 32px !important; }
+  .app-shell .cand-table .view-eval-btn { height: 32px !important; }
+
+  /* Create form */
+  .ci { padding: 10px; }
+  .ci-top { margin-bottom: 8px; gap: 8px; }
+  .ci-sub { display: none; }
+  .ci-btn-add { height: 36px; padding: 0 12px; }
+  .ci-textarea { min-height: 96px; }
+  .ci-tags-box { min-height: 44px; padding: 8px; }
+  .ci-chip { padding: 3px 9px; }
+  .ci-actions { margin: 10px -10px -10px; padding: 8px 10px; bottom: calc(53px + env(safe-area-inset-bottom)); }
+  .ci-btn-ghost, .ci-btn-primary { height: 38px; }
+
+  /* Modal sheet */
+  .session-modal-container .jd-modal-body { padding: 10px !important; gap: 10px !important; }
+  .session-modal-container .jd-modal-header { padding: 10px 12px !important; }
+}
+@media (min-width: 641px) and (max-width: 1024px) {
+  .sb { top: 46px; height: calc(100vh - 46px); }
+}
+
+/* ---------------- Small phones (fix stepper overflow, tighter UI) ---------------- */
+@media (max-width: 640px) {
+  /* Stepper must fit: items shrink, titles truncate */
+  .stp { justify-content: space-between; width: 100%; padding: 2px 0; }
+  .stp-item { flex: 1 1 0; min-width: 0; }
+  .stp-item:last-child { flex: 0 1 auto; }
+  .stp-btn { min-width: 0; gap: 6px; padding: 0; }
+  .stp-text { min-width: 0; }
+  .stp-title { overflow: hidden; text-overflow: ellipsis; }
+  .stp-line { flex: 1 1 auto; width: auto; min-width: 12px; margin: 0 8px; }
+  .stp-dot { width: 20px; height: 20px; font-size: 10px; }
+  .stp-item.is-active .stp-dot { box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15); }
+
+  /* Inputs + buttons */
+  .ci-control { height: 34px; font-size: 13px; }
+  .ci-input .ci-control { padding-left: 30px; }
+  .ci-input-icon { left: 9px; width: 13px; height: 13px; }
+  .ci-btn-add { height: 34px; }
+  .ci-btn-ghost, .ci-btn-primary { height: 36px; padding: 0 12px; font-size: var(--fs-base); white-space: nowrap; }
+  .ci-btn-ghost svg, .ci-btn-primary svg { width: 13px; height: 13px; }
+  .app-shell .search-input { font-size: 13px !important; }
+
+  /* Card spacing */
+  .ci-card-head h3 { font-size: var(--fs-base); }
+  .ci-card-head p { font-size: var(--fs-xs); }
+  .ci-label { font-size: var(--fs-sm); }
+  .ci-title { font-size: var(--fs-md); }
+}
+
+@media (max-width: 380px) {
+  :root {
+    --fs-xs: 9px;
+    --fs-sm: 10px;
+    --fs-base: 11px;
+    --fs-md: 12px;
+    --fs-lg: 13px;
+  }
+  .app-shell .app-main-content { padding-left: 6px !important; padding-right: 6px !important; }
+  .ci { padding: 8px; }
+  .ci-card-body { padding: 8px; }
+  .ci-card-head { padding: 6px 8px; }
+  .ci-card-head p { display: none; }
+  .ci-actions { margin: 8px -8px -8px; padding: 8px; gap: 6px; }
+  .ci-btn-ghost { padding: 0 10px; }
+  .ci-btn-primary { padding: 0 10px; }
+  .stp-title { font-size: var(--fs-sm); }
+  .stp-line { margin: 0 6px; }
+}

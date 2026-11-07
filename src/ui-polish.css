@@ -130,12 +130,6 @@
 .sb-status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--ui-ok); box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15); }
 
 @media (max-height: 640px) { .sb-robot { display: none; } }
-@media (max-width: 768px) {
-  .sb { position: static; width: 100%; height: auto; padding: 8px 12px; border-right: 0; border-bottom: 1px solid var(--ui-border); }
-  .sb-bottom { display: none; }
-  .sb-nav { flex-direction: row; }
-  .sb-link.is-active::before { display: none; }
-}
 
 /* ------------------------------ Shared page card ---------------------------- */
 /* Create page: stepper sits on the page background, the form card fills the

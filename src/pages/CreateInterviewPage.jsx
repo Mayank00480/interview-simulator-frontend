@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import CreateInterviewForm from '../components/CreateInterviewForm';
 import GenerateQuestionsPanel from '../components/GenerateQuestionsPanel';
+import Stepper from '../components/Stepper';
 import { createInterview } from '../services';
 import { useToast } from '../context/ToastContext';
 
@@ -46,62 +47,21 @@ export default function CreateInterviewPage() {
   };
 
   return (
-    <div className="create-interview-layout">
-      {/* Stepper Tabs Bar */}
-      <div className="interview-stepper-tabs" role="tablist" aria-label="Interview Creation Steps">
-        <button
-          type="button"
-          role="tab"
-          aria-selected={activeTab === 'create'}
-          className={`stepper-tab-btn ${activeTab === 'create' ? 'active' : ''} ${createdInterview ? 'completed' : ''
-            }`}
-          onClick={() => setActiveTab('create')}
-        >
-          <span className="stepper-tab-num">
-            {createdInterview ? (
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-            ) : (
-              '1'
-            )}
-          </span>
-          <div className="stepper-tab-text">
-            <span className="stepper-tab-title">1. Create Interview</span>
-            <span className="stepper-tab-desc">Job role, duration & skills</span>
-          </div>
-        </button>
-
-        <div className="stepper-separator" />
-
-        <button
-          type="button"
-          role="tab"
-          aria-selected={activeTab === 'generate'}
-          className={`stepper-tab-btn ${activeTab === 'generate' ? 'active' : ''} ${!createdInterview ? 'disabled' : ''
-            }`}
-          onClick={() => createdInterview && setActiveTab('generate')}
-          disabled={!createdInterview}
-          title={
-            !createdInterview
-              ? 'Complete Step 1 (Create Interview) first'
-              : 'Generate Questions'
-          }
-        >
-          <span className="stepper-tab-num">2</span>
-          <div className="stepper-tab-text">
-            <span className="stepper-tab-title">2. Generate Questions</span>
-            <span className="stepper-tab-desc">
-              {!createdInterview ? 'Locked until created' : 'AI question generation'}
-            </span>
-          </div>
-          {!createdInterview && (
-            <span className="stepper-lock-icon" aria-hidden="true">
-              🔒
-            </span>
-          )}
-        </button>
-      </div>
+    <div className="create-interview-layout ci-shell">
+      <Stepper
+        steps={[
+          { key: 'create', title: 'Create Interview', description: 'Role, skills & settings' },
+          {
+            key: 'generate',
+            title: 'Generate Questions',
+            description: createdInterview ? 'AI question generation' : 'Locked until created',
+          },
+        ]}
+        activeKey={activeTab}
+        isComplete={(key) => key === 'create' && !!createdInterview}
+        isLocked={(key) => key === 'generate' && !createdInterview}
+        onStepClick={setActiveTab}
+      />
 
       <div className="create-interview-page-wrapper">
         <div className="create-interview-main-column">

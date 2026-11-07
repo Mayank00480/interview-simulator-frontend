@@ -148,33 +148,35 @@ export default function InterviewCandidatesPage() {
 
   return (
     <div className="interviews-page">
-      {/* Top Navigation & Breadcrumbs */}
-      <div className="candidates-top-nav">
-        <button
-          type="button"
-          className="back-to-interviews-btn"
-          onClick={() => navigate('/interviews')}
-        >
-          &larr; Back to Interviews
-        </button>
-
-        <div className="breadcrumb-trail">
-          <Link to="/interviews" className="breadcrumb-link">Interviews</Link>
-          <span className="breadcrumb-separator">/</span>
-          <span className="breadcrumb-current">{role}</span>
-          <span className="breadcrumb-separator">/</span>
-          <span className="breadcrumb-badge">Candidates</span>
-        </div>
-      </div>
-
       {/* Header */}
-      <div className="interviews-page-header">
+      <div className="interviews-page-header ip-head">
+        <span className="ip-head-icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+          </svg>
+        </span>
         <div className="header-text-group">
-          <h1 className="interviews-page-title">Candidate Sessions &mdash; {role}</h1>
+          <nav className="ip-crumbs" aria-label="Breadcrumb">
+            <Link to="/interviews">Interviews</Link>
+            <span>/</span>
+            <span className="ip-crumbs-current">{role}</span>
+          </nav>
+          <h1 className="interviews-page-title">
+            Candidate Sessions <span className="ip-role-chip">{role}</span>
+          </h1>
           <p className="interviews-page-subtitle">
             Overview of all candidate submissions, skill scores, and AI evaluations for this interview.
           </p>
         </div>
+        <button type="button" className="ip-back-btn" onClick={() => navigate('/interviews')}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+          Back to Interviews
+        </button>
       </div>
 
       {/* Metric Stat Cards */}
@@ -286,7 +288,7 @@ export default function InterviewCandidatesPage() {
       {/* Sessions Table */}
       <div className="interviews-table-card">
         <div className="table-responsive">
-          <table className="interviews-table">
+          <table className="interviews-table cand-table">
             <thead>
               <tr>
                 <th style={{ width: '22%' }}>Candidate Name</th>
@@ -671,6 +673,7 @@ export default function InterviewCandidatesPage() {
                               justifyContent: 'space-between',
                               padding: '10px 12px',
                               background: isExpanded ? '#f8fafc' : '#ffffff',
+                              transition: 'background var(--qa-anim, 300ms) ease',
                               cursor: 'pointer',
                               userSelect: 'none',
                               gap: '8px',
@@ -772,7 +775,7 @@ export default function InterviewCandidatesPage() {
                                   fontSize: '11px',
                                   color: '#64748b',
                                   transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-                                  transition: 'transform 0.2s ease',
+                                  transition: 'transform var(--qa-anim, 300ms) ease',
                                   display: 'inline-block',
                                 }}
                               >
@@ -781,8 +784,9 @@ export default function InterviewCandidatesPage() {
                             </div>
                           </div>
 
-                          {/* Accordion Body */}
-                          {isExpanded && (
+                          {/* Accordion Body (always mounted so height can animate) */}
+                          <div className={`qa-collapse ${isExpanded ? 'is-open' : ''}`} aria-hidden={!isExpanded}>
+                            <div className="qa-collapse-inner">
                             <div
                               style={{
                                 padding: '10px 12px',
@@ -817,7 +821,8 @@ export default function InterviewCandidatesPage() {
                                 )}
                               </div>
                             </div>
-                          )}
+                            </div>
+                          </div>
                         </div>
                       );
                     })}

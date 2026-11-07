@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import logo from '../assets/logo.svg';
 
 export default function Navbar({ user, onLogout }) {
   const [showDropdown, setShowDropdown] = useState(false);
@@ -11,12 +10,19 @@ export default function Navbar({ user, onLogout }) {
     <header className="app-navbar">
       <div className="nav-brand">
         <div className="nav-logo-box">
-          <img src={logo} alt="Logo" className="nav-logo" />
+          <svg className="nav-bolt" width="22" height="22" viewBox="0 0 24 24" aria-label="Logo" role="img">
+            <defs>
+              <linearGradient id="navBolt" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stopColor="#7c3aed" />
+                <stop offset="100%" stopColor="#2563eb" />
+              </linearGradient>
+            </defs>
+            <path d="M13.5 2 4 13.5h6.5L9 22l10-12.5h-6.6L13.5 2z" fill="url(#navBolt)" />
+          </svg>
         </div>
         <div className="nav-brand-text">
           <div className="nav-title-row">
             <span className="nav-title">AI Interview Simulator</span>
-            <span className="nav-tag">Recruiter Pro</span>
           </div>
           <span className="nav-subtitle">Smarter Practice. Better Opportunities.</span>
         </div>

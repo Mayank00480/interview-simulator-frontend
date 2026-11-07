@@ -102,13 +102,27 @@ export default function InterviewPage() {
   return (
     <div className="interviews-page">
       {/* Page Header */}
-      <div className="interviews-page-header">
+      <div className="interviews-page-header ip-head">
+        <span className="ip-head-icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="2" y="7" width="20" height="14" rx="2" />
+            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+            <path d="M2 13h20" />
+          </svg>
+        </span>
         <div className="header-text-group">
           <h1 className="interviews-page-title">Interviews</h1>
           <p className="interviews-page-subtitle">
             Overview of all scheduled, active, and completed technical interview setups.
           </p>
         </div>
+        <button type="button" className="ip-create-btn" onClick={() => navigate('/create-interview')}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+          New Interview
+        </button>
       </div>
 
       {/* Filter and Search Bar: Tabs on Left, Search on Right */}
@@ -184,7 +198,7 @@ export default function InterviewPage() {
       {/* Tabular Data View: Reduced width, no horizontal scrollbar, clean fit */}
       <div className="interviews-table-card">
         <div className="table-responsive">
-          <table className="interviews-table">
+          <table className="interviews-table ip-table">
             <thead>
               <tr>
                 <th style={{ width: '20%' }}>Job Role</th>
